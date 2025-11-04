@@ -1,0 +1,289 @@
+# Paper_Own - Research Repository .gitignore
+
+# ============================================================================
+# SENSITIVE / PERSONAL FILES
+# ============================================================================
+
+# API keys and credentials
+*.key
+*.pem
+*.env
+.env*
+secrets/
+credentials/
+
+# Personal notes that shouldn't be public
+*PRIVATE*
+*personal*
+*TODO_personal*
+
+# ============================================================================
+# MICROSOFT OFFICE / WORD DOCUMENTS
+# ============================================================================
+
+# Word temporary files
+~$*
+
+# Word documents (uncomment if you want to exclude the main paper)
+# *.docx
+# *.doc
+
+# Keep the main paper but exclude backups
+*_backup.docx
+*_old.docx
+*_draft.docx
+
+# ============================================================================
+# PAPERS / RESEARCH PDFs (Copyright Protection)
+# ============================================================================
+
+# Exclude research papers to avoid copyright issues
+Papers/
+*.pdf
+
+# Exception: Keep your own generated figures/charts
+!figures/*.pdf
+!results/**/*.pdf
+
+# ============================================================================
+# PYTHON
+# ============================================================================
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+virtualenv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Python distribution / packaging
+*.egg-info/
+dist/
+build/
+*.egg
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Unit test / coverage reports
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+
+# ============================================================================
+# OPERATING SYSTEM FILES
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Thumbnails
+Thumbs.db
+ehthumbs.db
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+
+# ============================================================================
+# IDE / EDITOR FILES
+# ============================================================================
+
+# VSCode
+.vscode/
+*.code-workspace
+
+# PyCharm
+.idea/
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+\#*\#
+.\#*
+
+# ============================================================================
+# GENERATED RESULTS (Optional - Uncomment if too large)
+# ============================================================================
+
+# Uncomment these if your results are too large for git
+# results/
+# results/**/*.v
+# results/**/*.vvp
+# results/**/*.vcd
+
+# But keep the summary JSON files
+!results/**/benchmark_results.json
+!results/**/analysis/*.csv
+!results/**/analysis/*.md
+
+# Keep important result summaries even if results/ is ignored
+!results/mini_benchmark/benchmark_results.json
+!results/phase1_benchmark/benchmark_results.json
+!results/phase2_benchmark/benchmark_results.json
+!results/phase3_benchmark/benchmark_results.json
+
+# ============================================================================
+# EDA TOOL GENERATED FILES
+# ============================================================================
+
+# Verilog simulation files
+*.vvp
+*.vcd
+*.lxt
+
+# Synthesis files
+*.synth
+*.log
+*.rpt
+
+# Verilator files
+*.d
+*.mk
+obj_dir/
+
+# Yosys files
+*.ys
+
+# ============================================================================
+# DOCKER
+# ============================================================================
+
+# Docker volumes
+.docker/
+
+# ============================================================================
+# DATASETS (if very large)
+# ============================================================================
+
+# Uncomment if dataset is too large
+# Quantitative/dataset/
+# !Quantitative/dataset/tasks.json
+# !Quantitative/dataset/**/*.v
+
+# ============================================================================
+# TEMPORARY FILES
+# ============================================================================
+
+# General temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*_old
+*_backup
+temp/
+tmp/
+
+# Test files that shouldn't be committed
+test_*.py
+scratch.py
+debug.py
+temp_*.v
+
+# ============================================================================
+# LARGE FILES / MODELS
+# ============================================================================
+
+# Model weights (if you download any)
+*.bin
+*.safetensors
+*.gguf
+models/
+
+# Large data files
+*.parquet
+*.feather
+*.hdf5
+*.h5
+
+# ============================================================================
+# LOGS
+# ============================================================================
+
+*.log
+logs/
+*.out
+*.err
+
+# ============================================================================
+# RESEARCH SPECIFIC
+# ============================================================================
+
+# Experimental results that aren't final
+experiments/
+scratch/
+old/
+archive/
+
+# Personal annotations on papers
+*_annotated.pdf
+*_notes.txt
+
+# ============================================================================
+# KEEP THESE IMPORTANT FILES
+# ============================================================================
+
+# Make sure these are NOT ignored (use ! to negate)
+!README.md
+!requirements.txt
+!Dockerfile
+!docker-compose.yml
+!.gitignore
+
+# Keep all markdown documentation
+!*.md
+!**/*.md
+
+# Keep all Python source files
+!*.py
+!**/*.py
+
+# Keep all JSON configuration files
+!*.json
+!**/*.json
+
+# Keep figures (except very large ones)
+!figures/
+!figures/*.png
+!figures/*.jpg
+
+# Keep the main Word document (comment out if you want to exclude)
+!Benchmarking*.docx
+
+# Keep dataset files
+!Quantitative/dataset/
+!Quantitative/dataset/**/*.v
+!Quantitative/dataset/**/*.json
+
+# ============================================================================
+# END OF .gitignore
+# ============================================================================
+

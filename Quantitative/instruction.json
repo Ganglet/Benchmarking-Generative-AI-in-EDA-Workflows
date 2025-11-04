@@ -1,0 +1,232 @@
+{
+    "project_title": "Benchmarking Generative AI in EDA Workflows",
+    "research_scope": {
+      "objective": "Evaluate the capability and reliability of open-source generative models to automatically generate synthesizable Verilog HDL and functional testbenches for standard digital circuit design tasks.",
+      "subtasks": [
+        "Circuit (HDL) generation from textual specification",
+        "Testbench generation for functional verification",
+        "Quantitative benchmarking against reference implementations"
+      ],
+      "boundaries": {
+        "level": "RTL (Register Transfer Level)",
+        "languages": ["Verilog"],
+        "excluded_domains": ["Layout synthesis", "Analog circuits", "Timing closure"],
+        "target_audience": ["EDA research community", "AI4EDA domain experts"]
+      }
+    },
+    "models": [
+      {
+        "tier": "large",
+        "name": "Llama 3 8B Instruct",
+        "source": "meta-llama/Meta-Llama-3-8B-Instruct",
+        "access_method": ["Ollama", "Hugging Face Transformers"],
+        "role": "High-quality general-purpose baseline"
+      },
+      {
+        "tier": "medium",
+        "name": "StarCoder2 7B",
+        "source": "bigcode/starcoder2-7b",
+        "access_method": ["Hugging Face Transformers"],
+        "role": "Code-specialized mid-tier model"
+      },
+      {
+        "tier": "small",
+        "name": "TinyLlama 1.1B",
+        "source": "TinyLlama/TinyLlama-1.1B-intermediate-step-1431k",
+        "access_method": ["Ollama", "LM Studio"],
+        "role": "Lightweight baseline for resource-constrained setups"
+      }
+    ],
+    "dataset": {
+      "description": "Task library of standardized digital circuit specifications and corresponding verified HDL + testbenches.",
+      "sources": ["OpenCores", "HDLBits", "Custom generated specs"],
+      "target_size": 120,
+      "composition": {
+        "combinational": ["adders", "comparators", "multiplexers", "encoders", "decoders"],
+        "sequential": ["counters", "shift_registers", "lfsr"],
+        "fsm": ["sequence_detectors", "traffic_light_controller"],
+        "mixed": ["small_ALU", "priority_encoder"]
+      },
+      "data_format": {
+        "fields": [
+          "task_id",
+          "category",
+          "specification_text",
+          "reference_hdl_path",
+          "reference_tb_path",
+          "difficulty"
+        ],
+        "example": {
+          "task_id": "adder_4bit_001",
+          "category": "combinational",
+          "specification_text": "Design a 4-bit ripple carry adder in Verilog. Inputs: a[3:0], b[3:0]; Outputs: sum[3:0], carry_out.",
+          "reference_hdl_path": "ref/adder_4bit.v",
+          "reference_tb_path": "ref/adder_4bit_tb.v",
+          "difficulty": "easy"
+        }
+      }
+    },
+    "prompt_templates": [
+      {
+        "template_id": "A",
+        "description": "Minimal natural-language specification",
+        "example_prompt": "Design a 4-bit ripple carry adder in Verilog."
+      },
+      {
+        "template_id": "B",
+        "description": "Specification + I/O interface definition",
+        "example_prompt": "Write synthesizable Verilog for a 4-bit synchronous up-counter with enable and reset. Module interface: input clk, reset, en; output reg [3:0] count."
+      },
+      {
+        "template_id": "C",
+        "description": "Specification + sample I/O examples",
+        "example_prompt": "Design a 4-bit binary to gray code converter. Input-output examples: 0000→0000, 0001→0001, 0010→0011, 0011→0010. Write synthesizable Verilog."
+      }
+    ],
+    "benchmark_pipeline": {
+      "stages": [
+        {
+          "name": "Model Inference",
+          "actions": [
+            "Feed each specification prompt to all three models.",
+            "Collect HDL/testbench outputs with metadata (model name, seed, runtime)."
+          ],
+          "parameters": {
+            "temperature": [0.0, 0.3],
+            "max_new_tokens": 512,
+            "repetitions_per_prompt": 3
+          }
+        },
+        {
+          "name": "Syntax Validation",
+          "tools": ["Verilator", "Icarus Verilog"],
+          "commands": [
+            "verilator --lint-only <file.v>",
+            "iverilog -t null -o /dev/null <file.v>"
+          ],
+          "output_metrics": ["syntax_ok", "error_log"]
+        },
+        {
+          "name": "Functional Simulation",
+          "tools": ["Icarus Verilog", "Verilator"],
+          "procedure": [
+            "If model generated DUT only, pair with reference testbench.",
+            "If model generated TB only, pair with reference DUT.",
+            "Simulate and verify output correctness via waveform or log comparison."
+          ],
+          "output_metrics": ["functional_correctness", "simulation_log"]
+        },
+        {
+          "name": "Synthesis Analysis",
+          "tools": ["Yosys"],
+          "commands": [
+            "yosys -p 'read_verilog <file.v>; synth; stat;'"
+          ],
+          "output_metrics": ["cell_count", "logic_depth", "area_proxy"]
+        },
+        {
+          "name": "Testbench Effectiveness",
+          "tools": ["Custom Python fault injector"],
+          "procedure": [
+            "Inject single-bit or stuck-at faults into DUT.",
+            "Run generated testbench and observe if assertion or mismatch occurs."
+          ],
+          "output_metrics": ["fault_detection_ratio", "coverage_estimate"]
+        },
+        {
+          "name": "Results Aggregation",
+          "output_format": "CSV",
+          "fields": [
+            "task_id", "model", "prompt_type", "syntax_ok", "functional_ok",
+            "cell_count", "tdr", "generation_time", "hallucination_count"
+          ]
+        }
+      ]
+    },
+    "metrics": {
+      "primary": [
+        {
+          "name": "Syntax Validity",
+          "symbol": "SV",
+          "definition": "Percentage of Verilog files that compile without syntax errors."
+        },
+        {
+          "name": "Functional Correctness",
+          "symbol": "FC",
+          "definition": "Percentage of designs that produce expected simulation outputs under reference testbench."
+        },
+        {
+          "name": "Synthesis Quality",
+          "symbol": "SQ",
+          "definition": "Average cell count and logic depth of synthesized design (lower is better)."
+        },
+        {
+          "name": "Testbench Detection Rate",
+          "symbol": "TDR",
+          "definition": "Fraction of injected faults detected by generated testbench."
+        },
+        {
+          "name": "Generation Time",
+          "symbol": "GT",
+          "definition": "Average time taken (in seconds) for model inference."
+        }
+      ],
+      "secondary": [
+        {
+          "name": "Prompt Sensitivity",
+          "symbol": "PS",
+          "definition": "Variance in FC across different prompt templates for the same model."
+        },
+        {
+          "name": "Hallucination Index",
+          "symbol": "HI",
+          "definition": "Average count of undeclared signals or impossible constructs per 100 lines of HDL."
+        },
+        {
+          "name": "Usability Score",
+          "symbol": "US",
+          "definition": "Composite score = 0.4*FC + 0.3*SV + 0.2*(1 - normalized area) + 0.1*TDR"
+        }
+      ]
+    },
+    "evaluation": {
+      "quantitative_analysis": [
+        "Aggregate per-model averages and standard deviations for all metrics.",
+        "Run paired statistical tests (Wilcoxon/t-test) for FC and SV between models.",
+        "Compute confidence intervals (95%) for functional correctness."
+      ],
+      "qualitative_analysis": [
+        "Inspect representative failed outputs for syntax, interface, or logic errors.",
+        "Classify failures: syntax, interface mismatch, behavioral bug, non-synthesizable construct, ineffective testbench.",
+        "Present examples and categorize root causes."
+      ],
+      "visualizations": [
+        "Bar chart: Functional pass rate per model per task category.",
+        "Box plot: Cell count (area proxy) distribution per model.",
+        "Heatmap: Prompt sensitivity variance.",
+        "Failure distribution pie chart."
+      ]
+    },
+    "tools_and_environment": {
+      "languages": ["Python 3.10+", "Verilog"],
+      "frameworks": ["Transformers", "Ollama", "Yosys", "Icarus Verilog", "Verilator"],
+      "automation": "Python orchestration script to automate model querying, compilation, simulation, and metric logging.",
+      "environment": {
+        "containerization": "Docker image with EDA + Python dependencies",
+        "hardware": {
+          "minimum_gpu": "6GB VRAM for 7B models",
+          "cpu_option": "TinyLlama runs on CPU"
+        }
+      }
+    },
+    "expected_outcomes": {
+      "deliverables": [
+        "A reproducible open-source benchmark suite for HDL/testbench generation.",
+        "Quantitative comparison across small, medium, and large open models.",
+        "Error taxonomy highlighting failure types and their frequencies.",
+        "Insights into model scaling, prompt robustness, and verification coverage."
+      ],
+      "contribution": "Establishes the first structured, reproducible benchmark for generative HDL and testbench generation, providing measurable baselines for future EDA-AI research."
+    }
+  }
+  

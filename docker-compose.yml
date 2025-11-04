@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  eda-benchmark:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: eda-ai-benchmark:latest
+    container_name: eda_benchmark
+    volumes:
+      # Mount local directories for easy development
+      - ./Quantitative:/workspace/Quantitative
+      - ./results:/workspace/results
+      - ./figures:/workspace/figures
+    working_dir: /workspace
+    stdin_open: true
+    tty: true
+    # Uncomment if you have a GPU and want to use it
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+    command: /bin/bash
+

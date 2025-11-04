@@ -1,0 +1,53 @@
+[
+  {
+    "task_id": "comb_and_gate_001",
+    "category": "combinational",
+    "difficulty": "easy",
+    "specification": "Design a simple 2-input AND gate in Verilog. Module should have two 1-bit inputs (a, b) and one 1-bit output (y).",
+    "reference_hdl": "combinational/and_gate/reference.v",
+    "reference_tb": "combinational/and_gate/testbench.v",
+    "inputs": ["a", "b"],
+    "outputs": ["y"]
+  },
+  {
+    "task_id": "comb_adder_2bit_001",
+    "category": "combinational",
+    "difficulty": "easy",
+    "specification": "Design a 2-bit binary adder in Verilog. Inputs: a[1:0], b[1:0]. Outputs: sum[1:0], carry_out. The circuit should add two 2-bit numbers and produce a 2-bit sum plus a carry output.",
+    "reference_hdl": "combinational/adder_2bit/reference.v",
+    "reference_tb": "combinational/adder_2bit/testbench.v",
+    "inputs": ["a[1:0]", "b[1:0]"],
+    "outputs": ["sum[1:0]", "carry_out"]
+  },
+  {
+    "task_id": "comb_mux_2to1_001",
+    "category": "combinational",
+    "difficulty": "easy",
+    "specification": "Design a 2-to-1 multiplexer in Verilog. Inputs: d0, d1 (data inputs), sel (select). Output: y. When sel=0, output y should be d0. When sel=1, output y should be d1.",
+    "reference_hdl": "combinational/mux_2to1/reference.v",
+    "reference_tb": "combinational/mux_2to1/testbench.v",
+    "inputs": ["d0", "d1", "sel"],
+    "outputs": ["y"]
+  },
+  {
+    "task_id": "seq_dff_001",
+    "category": "sequential",
+    "difficulty": "easy",
+    "specification": "Design a D flip-flop in Verilog with synchronous reset. Inputs: clk (clock), rst (reset), d (data input). Output: q (data output). On the positive edge of clock, if reset is high, q should be 0, otherwise q should take the value of d.",
+    "reference_hdl": "sequential/d_flipflop/reference.v",
+    "reference_tb": "sequential/d_flipflop/testbench.v",
+    "inputs": ["clk", "rst", "d"],
+    "outputs": ["q"]
+  },
+  {
+    "task_id": "seq_counter_4bit_001",
+    "category": "sequential",
+    "difficulty": "medium",
+    "specification": "Design a 4-bit synchronous up-counter in Verilog with synchronous reset and enable. Inputs: clk (clock), rst (reset), en (enable). Output: count[3:0]. When reset is high, count should be 0. When enable is high and reset is low, count should increment by 1 on each clock edge. Count should wrap around from 15 to 0.",
+    "reference_hdl": "sequential/counter_4bit/reference.v",
+    "reference_tb": "sequential/counter_4bit/testbench.v",
+    "inputs": ["clk", "rst", "en"],
+    "outputs": ["count[3:0]"]
+  }
+]
+
