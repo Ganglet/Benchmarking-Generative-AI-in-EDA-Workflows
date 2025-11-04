@@ -76,12 +76,13 @@ Generate ONLY the module code (no explanations):
 # ============================================================================
 
 def extract_module_name_from_task_id(task_id: str) -> str:
-    """Extract expected module name from task ID"""
-    # Remove category prefix and instance number
-    # e.g., "comb_and_gate_001" -> "and_gate"
+    """Extract expected module name from task ID (with special cases)."""
     name = task_id.replace("comb_", "").replace("seq_", "")
-    name = name.rsplit("_", 1)[0]  # Remove trailing numbers
-    return name
+    base = name.rsplit("_", 1)[0]
+    special_map = {
+        "dff": "d_flipflop",
+    }
+    return special_map.get(base, base)
 
 
 def get_port_specification(module_name: str) -> dict:

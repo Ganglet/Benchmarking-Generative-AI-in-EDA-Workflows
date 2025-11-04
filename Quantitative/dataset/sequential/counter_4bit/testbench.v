@@ -71,7 +71,10 @@ module tb_counter_4bit;
         en = 1;
         rst = 1; #10;
         rst = 0;
-        count = 4'd14;  // Force to 14 (cheating for test speed)
+        // Force internal count for faster wrap-around test
+        force dut.count = 4'd14;  // Force to 14 (cheating for test speed)
+        #1;
+        release dut.count;
         #10;  // Should go to 15
         #10;  // Should wrap to 0
         total = total + 1;

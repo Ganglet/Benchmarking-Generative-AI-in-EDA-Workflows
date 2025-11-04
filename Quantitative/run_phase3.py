@@ -16,9 +16,13 @@ import time
 
 
 def extract_module_name(task_id: str) -> str:
-    """Extract module name from task ID"""
+    """Extract expected module name from task ID (with special cases)."""
     name = task_id.replace("comb_", "").replace("seq_", "")
-    return name.rsplit("_", 1)[0]
+    base = name.rsplit("_", 1)[0]
+    special_map = {
+        "dff": "d_flipflop",
+    }
+    return special_map.get(base, base)
 
 
 def get_port_spec(module_name: str) -> dict:
