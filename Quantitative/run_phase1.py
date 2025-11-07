@@ -8,7 +8,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from dataset_loader import load_tasks_from_json, print_dataset_stats, validate_dataset
-from model_interface import OllamaInterface
+from model_interface import OllamaInterface, HuggingFaceInterface
 from Eval_Pipeline import BenchmarkPipeline, EvaluationMetrics, HDLCompiler, HDLSimulator
 import time
 
@@ -83,6 +83,7 @@ def main():
     print("\n🤖 Initializing models...")
     models = []
     
+    # Large model: Llama-3-8B
     try:
         llama3 = OllamaInterface("llama3")
         models.append(("Llama-3-8B-Large", llama3))
@@ -90,6 +91,16 @@ def main():
     except Exception as e:
         print(f"  ⚠ Llama-3 8B failed: {e}")
     
+    # Medium model: StarCoder2-7B
+    try:
+        starcoder2 = HuggingFaceInterface("bigcode/starcoder2-7b")
+        models.append(("StarCoder2-7B-Medium", starcoder2))
+        print("  ✓ StarCoder2 7B (Medium tier) ready")
+    except Exception as e:
+        print(f"  ⚠ StarCoder2 7B not available: {e}")
+        print(f"     Note: Requires transformers library and sufficient GPU/CPU memory")
+    
+    # Small model: TinyLlama-1.1B
     try:
         tinyllama = OllamaInterface("tinyllama")
         models.append(("TinyLlama-1.1B-Small", tinyllama))

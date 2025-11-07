@@ -208,21 +208,79 @@ class HuggingFaceInterface:
             
             print(f"Loading {self.model_name}...")
             
+            # Check transformers version
+            import transformers
+            transformers_version = transformers.__version__
+            print(f"  Transformers version: {transformers_version}")
+            
+            # Try to use StarCoder2ForCausalLM explicitly if available
+            model_class = AutoModelForCausalLM
+            if "starcoder2" in self.model_name.lower():
+                try:
+                    from transformers import StarCoder2ForCausalLM
+                    model_class = StarCoder2ForCausalLM
+                    print(f"  Using StarCoder2ForCausalLM class")
+                except ImportError:
+                    print(f"  ⚠ StarCoder2ForCausalLM not available in transformers {transformers_version}")
+                    print(f"  ⚠ StarCoder2 requires transformers>=4.35.0, but you have {transformers_version}")
+                    print(f"  ⚠ Attempting with AutoModelForCausalLM (may fail)")
+                    print(f"  ⚠ Please upgrade: pip install --upgrade transformers>=4.35.0")
+            
+            # Load tokenizer first
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
-            self.model = AutoModelForCausalLM.from_pretrained(
-                self.model_name,
-                device_map=self.device,
-                torch_dtype=torch.float16 if self.device != "cpu" else torch.float32,
-                trust_remote_code=True
-            )
             
-            print(f"✓ Model loaded successfully")
+            # StarCoder2 and many code models need a pad_token - set it if missing
+            if self.tokenizer.pad_token is None:
+                self.tokenizer.pad_token = self.tokenizer.eos_token
+                print(f"  Set pad_token to eos_token")
             
-        except ImportError:
-            print("⚠ transformers library not installed")
-            print("  Install: pip install transformers torch accelerate")
+            # Determine device - on Mac, use CPU explicitly
+            if self.device == "auto":
+                if torch.cuda.is_available():
+                    device = "cuda"
+                    print(f"  Using CUDA")
+                else:
+                    device = "cpu"
+                    print(f"  Using CPU (no GPU detected)")
+            else:
+                device = self.device
+            
+            # Load model - use device_map only for CUDA, otherwise use standard device placement
+            
+            if device == "cuda":
+                self.model = model_class.from_pretrained(
+                    self.model_name,
+                    device_map="auto",
+                    torch_dtype=torch.float16,
+                    trust_remote_code=True
+                )
+            else:
+                # For CPU, load normally and move to CPU explicitly
+                self.model = model_class.from_pretrained(
+                    self.model_name,
+                    torch_dtype=torch.float32,
+                    trust_remote_code=True
+                )
+                self.model = self.model.to(device)
+            
+            print(f"✓ Model loaded successfully on {device}")
+            
+        except ImportError as e:
+            print("⚠ transformers library not installed or missing StarCoder2 support")
+            print(f"  Error: {e}")
+            print("  Install: pip install --upgrade transformers>=4.35.0 torch accelerate")
+            self.model = None
+            self.tokenizer = None
         except Exception as e:
             print(f"⚠ Error loading model: {e}")
+            print(f"  Model: {self.model_name}")
+            print(f"  Error type: {type(e).__name__}")
+            print(f"  Solution: Try upgrading transformers: pip install --upgrade transformers>=4.35.0")
+            import traceback
+            print(f"  Full traceback:")
+            traceback.print_exc()
+            self.model = None
+            self.tokenizer = None
     
     def generate_hdl(
         self,
@@ -233,7 +291,7 @@ class HuggingFaceInterface:
     ) -> Tuple[str, float]:
         """Generate Verilog HDL from specification"""
         
-        if self.model is None:
+        if self.model is None or self.tokenizer is None:
             print("Model not loaded, using fallback")
             return self._fallback_code(), 0.0
         
@@ -242,14 +300,23 @@ class HuggingFaceInterface:
         start_time = time.time()
         
         try:
-            inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
+            inputs = self.tokenizer(prompt, return_tensors="pt")
+            
+            # Move inputs to model's device
+            if hasattr(self.model, 'device'):
+                device = self.model.device
+            else:
+                # If model doesn't have device attribute, get it from first parameter
+                device = next(self.model.parameters()).device
+            
+            inputs = {k: v.to(device) for k, v in inputs.items()}
             
             outputs = self.model.generate(
                 **inputs,
                 max_new_tokens=max_tokens,
                 temperature=temperature if temperature > 0 else 0.1,
                 do_sample=temperature > 0,
-                pad_token_id=self.tokenizer.eos_token_id
+                pad_token_id=self.tokenizer.pad_token_id or self.tokenizer.eos_token_id
             )
             
             generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
@@ -265,6 +332,8 @@ class HuggingFaceInterface:
             
         except Exception as e:
             print(f"Error during generation: {e}")
+            import traceback
+            traceback.print_exc()
             return self._fallback_code(), time.time() - start_time
     
     def _construct_prompt(self, specification: str, template: str = "A") -> str:

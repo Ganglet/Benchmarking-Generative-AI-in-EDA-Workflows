@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from dataset_loader import load_tasks_from_json, print_dataset_stats, validate_dataset
-from model_interface import OllamaInterface, create_model_interface
+from model_interface import OllamaInterface, HuggingFaceInterface, create_model_interface
 from Eval_Pipeline import BenchmarkPipeline, EvaluationMetrics
 
 
@@ -300,7 +300,7 @@ def run_improved_benchmark(phase: int = 3, use_refinement: bool = True):
     print("\n🤖 Initializing AI models...")
     models = []
     
-    # Try Ollama models
+    # Large model: Llama-3-8B
     try:
         print("  Attempting to connect to Ollama...")
         llama_model = OllamaInterface("llama3")
@@ -309,7 +309,16 @@ def run_improved_benchmark(phase: int = 3, use_refinement: bool = True):
     except Exception as e:
         print(f"  ⚠ Could not load Llama-3 8B: {e}")
     
-    # Add TinyLlama for model size comparison
+    # Medium model: StarCoder2-7B
+    try:
+        starcoder2_model = HuggingFaceInterface("bigcode/starcoder2-7b")
+        models.append(("StarCoder2-7B-Medium", starcoder2_model))
+        print("  ✓ StarCoder2 7B (Medium tier) ready")
+    except Exception as e:
+        print(f"  ⚠ Could not load StarCoder2 7B: {e}")
+        print(f"     Note: Requires transformers library and sufficient GPU/CPU memory")
+    
+    # Small model: TinyLlama-1.1B
     try:
         tinyllama_model = OllamaInterface("tinyllama")
         models.append(("TinyLlama-1.1B-Small", tinyllama_model))
