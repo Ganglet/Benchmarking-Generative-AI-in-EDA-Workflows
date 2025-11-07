@@ -207,12 +207,12 @@ def main():
     
     # Medium model: StarCoder2-7B
     try:
-        starcoder2 = HuggingFaceInterface("bigcode/starcoder2-7b")
+        starcoder2 = OllamaInterface("starcoder2:7b")
         models.append(("StarCoder2-7B-Medium", starcoder2))
         print("  ✓ StarCoder2 7B (Medium tier) ready")
     except Exception as e:
         print(f"  ⚠ StarCoder2 7B not available: {e}")
-        print(f"     Note: Requires transformers library and sufficient GPU/CPU memory")
+        print(f"     Note: Make sure StarCoder2 is installed: 'ollama pull starcoder2:7b'")
     
     # Small model: TinyLlama-1.1B
     try:

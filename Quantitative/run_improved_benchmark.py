@@ -311,12 +311,12 @@ def run_improved_benchmark(phase: int = 3, use_refinement: bool = True):
     
     # Medium model: StarCoder2-7B
     try:
-        starcoder2_model = HuggingFaceInterface("bigcode/starcoder2-7b")
+        starcoder2_model = OllamaInterface("starcoder2:7b")
         models.append(("StarCoder2-7B-Medium", starcoder2_model))
         print("  ✓ StarCoder2 7B (Medium tier) ready")
     except Exception as e:
         print(f"  ⚠ Could not load StarCoder2 7B: {e}")
-        print(f"     Note: Requires transformers library and sufficient GPU/CPU memory")
+        print(f"     Note: Make sure StarCoder2 is installed: 'ollama pull starcoder2:7b'")
     
     # Small model: TinyLlama-1.1B
     try:
