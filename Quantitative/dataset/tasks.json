@@ -10,6 +10,56 @@
     "outputs": ["y"]
   },
   {
+    "task_id": "comb_or_gate_001",
+    "category": "combinational",
+    "difficulty": "easy",
+    "specification": "Design a 2-input OR gate in Verilog. Inputs are a and b, and the output y should be the logical OR of the inputs.",
+    "reference_hdl": "combinational/or_gate/reference.v",
+    "reference_tb": "combinational/or_gate/testbench.v",
+    "inputs": ["a", "b"],
+    "outputs": ["y"]
+  },
+  {
+    "task_id": "comb_not_gate_001",
+    "category": "combinational",
+    "difficulty": "easy",
+    "specification": "Design an inverter in Verilog. Input a should be inverted to produce output y.",
+    "reference_hdl": "combinational/not_gate/reference.v",
+    "reference_tb": "combinational/not_gate/testbench.v",
+    "inputs": ["a"],
+    "outputs": ["y"]
+  },
+  {
+    "task_id": "comb_xor_gate_001",
+    "category": "combinational",
+    "difficulty": "easy",
+    "specification": "Design a 2-input XOR gate in Verilog. Inputs a and b drive output y which should be high only when exactly one input is high.",
+    "reference_hdl": "combinational/xor_gate/reference.v",
+    "reference_tb": "combinational/xor_gate/testbench.v",
+    "inputs": ["a", "b"],
+    "outputs": ["y"]
+  },
+  {
+    "task_id": "comb_half_adder_001",
+    "category": "combinational",
+    "difficulty": "easy",
+    "specification": "Design a half-adder in Verilog. Inputs a and b are added to produce outputs sum and carry.",
+    "reference_hdl": "combinational/half_adder/reference.v",
+    "reference_tb": "combinational/half_adder/testbench.v",
+    "inputs": ["a", "b"],
+    "outputs": ["sum", "carry"]
+  },
+  {
+    "task_id": "comb_full_adder_001",
+    "category": "combinational",
+    "difficulty": "medium",
+    "specification": "Design a 1-bit full adder in Verilog. Inputs a, b, and cin should produce a sum and carry-out output.",
+    "reference_hdl": "combinational/full_adder/reference.v",
+    "reference_tb": "combinational/full_adder/testbench.v",
+    "inputs": ["a", "b", "cin"],
+    "outputs": ["sum", "cout"]
+  },
+  {
     "task_id": "comb_adder_2bit_001",
     "category": "combinational",
     "difficulty": "easy",
@@ -30,6 +80,16 @@
     "outputs": ["y"]
   },
   {
+    "task_id": "comb_decoder_2to4_001",
+    "category": "combinational",
+    "difficulty": "medium",
+    "specification": "Design a 2-to-4 decoder in Verilog with an enable input. When enable is high, the 2-bit input should select exactly one active-high output line.",
+    "reference_hdl": "combinational/decoder_2to4/reference.v",
+    "reference_tb": "combinational/decoder_2to4/testbench.v",
+    "inputs": ["en", "in[1:0]"],
+    "outputs": ["out[3:0]"]
+  },
+  {
     "task_id": "seq_dff_001",
     "category": "sequential",
     "difficulty": "easy",
@@ -40,6 +100,46 @@
     "outputs": ["q"]
   },
   {
+    "task_id": "seq_t_flipflop_001",
+    "category": "sequential",
+    "difficulty": "easy",
+    "specification": "Design a T flip-flop in Verilog with synchronous reset. Inputs: clk, rst, t. Output: q toggles when t is high on the active clock edge and holds otherwise.",
+    "reference_hdl": "sequential/t_flipflop/reference.v",
+    "reference_tb": "sequential/t_flipflop/testbench.v",
+    "inputs": ["clk", "rst", "t"],
+    "outputs": ["q"]
+  },
+  {
+    "task_id": "seq_shift_register_4bit_001",
+    "category": "sequential",
+    "difficulty": "medium",
+    "specification": "Design a 4-bit serial-in shift register with synchronous reset and enable. Inputs: clk, rst, en, serial_in. Output: q[3:0] shifts left with the serial input when enabled.",
+    "reference_hdl": "sequential/shift_register_4bit/reference.v",
+    "reference_tb": "sequential/shift_register_4bit/testbench.v",
+    "inputs": ["clk", "rst", "en", "serial_in"],
+    "outputs": ["q[3:0]"]
+  },
+  {
+    "task_id": "seq_pipo_register_8bit_001",
+    "category": "sequential",
+    "difficulty": "easy",
+    "specification": "Design an 8-bit parallel-in parallel-out register with synchronous reset and enable. Inputs: clk, rst, en, d[7:0]. Output: q[7:0] captures d on the active clock edge when enabled.",
+    "reference_hdl": "sequential/pipo_register_8bit/reference.v",
+    "reference_tb": "sequential/pipo_register_8bit/testbench.v",
+    "inputs": ["clk", "rst", "en", "d[7:0]"],
+    "outputs": ["q[7:0]"]
+  },
+  {
+    "task_id": "seq_johnson_counter_4bit_001",
+    "category": "sequential",
+    "difficulty": "medium",
+    "specification": "Design a 4-bit Johnson counter with synchronous reset and enable. Inputs: clk, rst, en. Output: q[3:0] should cycle through the Johnson sequence when enabled.",
+    "reference_hdl": "sequential/johnson_counter_4bit/reference.v",
+    "reference_tb": "sequential/johnson_counter_4bit/testbench.v",
+    "inputs": ["clk", "rst", "en"],
+    "outputs": ["q[3:0]"]
+  },
+  {
     "task_id": "seq_counter_4bit_001",
     "category": "sequential",
     "difficulty": "medium",
@@ -48,6 +148,56 @@
     "reference_tb": "sequential/counter_4bit/testbench.v",
     "inputs": ["clk", "rst", "en"],
     "outputs": ["count[3:0]"]
+  },
+  {
+    "task_id": "fsm_sequence_detector_101_001",
+    "category": "fsm",
+    "difficulty": "medium",
+    "specification": "Design a Moore FSM in Verilog that asserts detected when the serial input observes the pattern 1-0-1 without overlap reset. Inputs: clk, rst, in_bit. Output: detected should pulse high when the pattern is seen.",
+    "reference_hdl": "fsm/sequence_detector_101/reference.v",
+    "reference_tb": "fsm/sequence_detector_101/testbench.v",
+    "inputs": ["clk", "rst", "in_bit"],
+    "outputs": ["detected"]
+  },
+  {
+    "task_id": "fsm_traffic_light_001",
+    "category": "fsm",
+    "difficulty": "medium",
+    "specification": "Design a 2-way traffic light controller FSM. Inputs: clk and rst. Outputs: ns_light[2:0], ew_light[2:0] encode red/yellow/green for north-south and east-west directions following a fixed cycle.",
+    "reference_hdl": "fsm/traffic_light_controller/reference.v",
+    "reference_tb": "fsm/traffic_light_controller/testbench.v",
+    "inputs": ["clk", "rst"],
+    "outputs": ["ns_light[2:0]", "ew_light[2:0]"]
+  },
+  {
+    "task_id": "fsm_turnstile_controller_001",
+    "category": "fsm",
+    "difficulty": "medium",
+    "specification": "Design a turnstile controller FSM. Inputs: clk, rst, coin, push. Outputs: locked indicates the gate state and alarm pulses when push occurs while locked without a coin.",
+    "reference_hdl": "fsm/turnstile_controller/reference.v",
+    "reference_tb": "fsm/turnstile_controller/testbench.v",
+    "inputs": ["clk", "rst", "coin", "push"],
+    "outputs": ["locked", "alarm"]
+  },
+  {
+    "task_id": "mixed_priority_encoder_4to2_001",
+    "category": "mixed",
+    "difficulty": "medium",
+    "specification": "Design a 4-to-2 priority encoder in Verilog. Input req[3:0] represents requests with bit 3 highest priority. Outputs should provide the encoded index and a valid flag.",
+    "reference_hdl": "mixed/priority_encoder_4to2/reference.v",
+    "reference_tb": "mixed/priority_encoder_4to2/testbench.v",
+    "inputs": ["req[3:0]"],
+    "outputs": ["code[1:0]", "valid"]
+  },
+  {
+    "task_id": "mixed_simple_alu_4bit_001",
+    "category": "mixed",
+    "difficulty": "medium",
+    "specification": "Design a 4-bit ALU in Verilog supporting add, subtract, bitwise AND, and bitwise XOR operations selected by op[1:0]. Outputs include the 4-bit result, carry_out, and zero flag.",
+    "reference_hdl": "mixed/simple_alu_4bit/reference.v",
+    "reference_tb": "mixed/simple_alu_4bit/testbench.v",
+    "inputs": ["a[3:0]", "b[3:0]", "op[1:0]"],
+    "outputs": ["result[3:0]", "carry_out", "zero"]
   }
 ]
 

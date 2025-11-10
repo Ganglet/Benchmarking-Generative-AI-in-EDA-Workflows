@@ -23,7 +23,12 @@ TEMPERATURE = 0.0  # Use 0.0 for deterministic results (or 0.3 for variation)
 
 def extract_module_name(task_id: str) -> str:
     """Extract expected module name from task ID (with special cases)."""
-    name = task_id.replace("comb_", "").replace("seq_", "")
+    for prefix in ("comb_", "seq_", "fsm_", "mixed_"):
+        if task_id.startswith(prefix):
+            name = task_id[len(prefix):]
+            break
+    else:
+        name = task_id
     base = name.rsplit("_", 1)[0]
     # Special-case mappings where dataset module names differ from ids
     special_map = {
@@ -818,8 +823,9 @@ def main():
     compiler = HDLCompiler()
     simulator = HDLSimulator()
     
-    # Test first 5 tasks
-    test_tasks = tasks[:5]
+    # Use the full task list
+    test_tasks = tasks
+    total_tasks = len(test_tasks)
     
     print("\n" + "="*70)
     print("RUNNING PHASE 2 BENCHMARK")
@@ -828,7 +834,7 @@ def main():
     print("  ✓ Task-specific module/port name constraints")
     print("  ✓ Automatic post-processing fixes")
     print(f"  ✓ Multiple repetitions ({REPETITIONS_PER_PROMPT} per task) for statistical significance")
-    print(f"\nTesting {len(test_tasks)} tasks × {len(models)} models × {REPETITIONS_PER_PROMPT} repetitions\n")
+    print(f"\nTesting {total_tasks} tasks × {len(models)} models × {REPETITIONS_PER_PROMPT} repetitions\n")
     
     # Store all results for statistics
     all_results = []  # Individual run results
@@ -840,7 +846,7 @@ def main():
         print(f"{'='*70}")
         
         for i, task in enumerate(test_tasks, 1):
-            print(f"\n[{i}/{len(test_tasks)}] {task.task_id}")
+            print(f"\n[{i}/{total_tasks}] {task.task_id}")
             print(f"  Category: {task.category}")
             print(f"  Running {REPETITIONS_PER_PROMPT} repetitions...")
             
@@ -972,7 +978,7 @@ def main():
     with open(individual_results_file, 'w') as f:
         json.dump(all_results, f, indent=2)
     print(f"✓ Individual run results: {individual_results_file}")
-    print(f"  Total runs: {len(all_results)} (5 tasks × {len(models)} models × {REPETITIONS_PER_PROMPT} reps)")
+    print(f"  Total runs: {len(all_results)} ({total_tasks} tasks × {len(models)} models × {REPETITIONS_PER_PROMPT} reps)")
     
     # Save aggregated statistics
     statistics_file = output_dir / "task_statistics.json"
