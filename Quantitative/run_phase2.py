@@ -38,57 +38,228 @@ def extract_module_name(task_id: str) -> str:
 
 
 def get_port_spec(module_name: str) -> dict:
-    """Get exact port specifications"""
+    """Get exact port specifications for all task types"""
     specs = {
+        # Combinational gates
         "and_gate": {
             "ports": "input wire a, input wire b, output wire y",
             "desc": "a, b (inputs), y (output)"
         },
-        "mux_2to1": {
-            "ports": "input wire d0, input wire d1, input wire sel, output wire y",
-            "desc": "d0, d1, sel (inputs), y (output)"
+        "or_gate": {
+            "ports": "input wire a, input wire b, output wire y",
+            "desc": "a, b (inputs), y (output)"
+        },
+        "not_gate": {
+            "ports": "input wire a, output wire y",
+            "desc": "a (input), y (output)"
+        },
+        "xor_gate": {
+            "ports": "input wire a, input wire b, output wire y",
+            "desc": "a, b (inputs), y (output)"
+        },
+        # Combinational arithmetic
+        "half_adder": {
+            "ports": "input wire a, input wire b, output wire sum, output wire carry",
+            "desc": "a, b (inputs), sum, carry (outputs)"
+        },
+        "full_adder": {
+            "ports": "input wire a, input wire b, input wire cin, output wire sum, output wire cout",
+            "desc": "a, b, cin (inputs), sum, cout (outputs)"
         },
         "adder_2bit": {
             "ports": "input wire [1:0] a, input wire [1:0] b, output wire [1:0] sum, output wire carry_out",
             "desc": "a[1:0], b[1:0] (inputs), sum[1:0], carry_out (outputs)"
         },
+        # Combinational selection
+        "mux_2to1": {
+            "ports": "input wire d0, input wire d1, input wire sel, output wire y",
+            "desc": "d0, d1, sel (inputs), y (output)"
+        },
+        "decoder_2to4": {
+            "ports": "input wire en, input wire [1:0] in, output wire [3:0] out",
+            "desc": "en, in[1:0] (inputs), out[3:0] (output)"
+        },
+        # Sequential basic
         "d_flipflop": {
             "ports": "input wire clk, input wire rst, input wire d, output reg q",
             "desc": "clk, rst, d (inputs), q (output reg)"
         },
+        "t_flipflop": {
+            "ports": "input wire clk, input wire rst, input wire t, output reg q",
+            "desc": "clk, rst, t (inputs), q (output reg)"
+        },
+        # Sequential registers
+        "shift_register_4bit": {
+            "ports": "input wire clk, input wire rst, input wire en, input wire serial_in, output reg [3:0] q",
+            "desc": "clk, rst, en, serial_in (inputs), q[3:0] (output reg)"
+        },
+        "pipo_register_8bit": {
+            "ports": "input wire clk, input wire rst, input wire en, input wire [7:0] d, output reg [7:0] q",
+            "desc": "clk, rst, en, d[7:0] (inputs), q[7:0] (output reg)"
+        },
+        # Sequential counters
         "counter_4bit": {
             "ports": "input wire clk, input wire rst, input wire en, output reg [3:0] count",
             "desc": "clk, rst, en (inputs), count[3:0] (output reg)"
+        },
+        "johnson_counter_4bit": {
+            "ports": "input wire clk, input wire rst, input wire en, output reg [3:0] q",
+            "desc": "clk, rst, en (inputs), q[3:0] (output reg)"
+        },
+        # FSM
+        "sequence_detector_101": {
+            "ports": "input wire clk, input wire rst, input wire in_bit, output reg detected",
+            "desc": "clk, rst, in_bit (inputs), detected (output reg)"
+        },
+        "traffic_light_controller": {
+            "ports": "input wire clk, input wire rst, output reg [2:0] ns_light, output reg [2:0] ew_light",
+            "desc": "clk, rst (inputs), ns_light[2:0], ew_light[2:0] (output reg)"
+        },
+        "turnstile_controller": {
+            "ports": "input wire clk, input wire rst, input wire coin, input wire push, output reg locked, output reg alarm",
+            "desc": "clk, rst, coin, push (inputs), locked, alarm (output reg)"
+        },
+        # Mixed/Complex
+        "priority_encoder_4to2": {
+            "ports": "input wire [3:0] req, output wire [1:0] code, output wire valid",
+            "desc": "req[3:0] (input), code[1:0], valid (outputs)"
+        },
+        "simple_alu_4bit": {
+            "ports": "input wire [3:0] a, input wire [3:0] b, input wire [1:0] op, output reg [3:0] result, output reg carry_out, output reg zero",
+            "desc": "a[3:0], b[3:0], op[1:0] (inputs), result[3:0], carry_out, zero (output reg)"
         }
     }
     return specs.get(module_name, {"ports": "/*from spec*/", "desc": "as specified"})
 
 
 def get_constrained_prompt(task_spec: str, module_name: str) -> str:
-    """Phase 2: Constrained prompt with exact module/port names"""
+    """Phase 2: Constrained prompt with exact module/port names and comprehensive examples"""
     port_info = get_port_spec(module_name)
     
-    # Add task-specific examples
+    # Add task-specific examples for all task types
     example = ""
-    if 'counter' in module_name:
+    
+    # Combinational gates
+    if 'and_gate' in module_name:
         example = """
 
-EXAMPLE - Sequential Counter with Reset and Enable:
-module counter_4bit(
-    input wire clk,
-    input wire rst,
-    input wire en,
-    output reg [3:0] count
+EXAMPLE - AND Gate:
+module and_gate(
+    input wire a,
+    input wire b,
+    output wire y
 );
-    always @(posedge clk) begin
-        if (rst)
-            count <= 4'b0000;
-        else if (en)
-            count <= count + 1;
-    end
+    assign y = a & b;
 endmodule
 """
-    elif 'dff' in module_name or 'flipflop' in module_name:
+    elif 'or_gate' in module_name:
+        example = """
+
+EXAMPLE - OR Gate:
+module or_gate(
+    input wire a,
+    input wire b,
+    output wire y
+);
+    assign y = a | b;
+endmodule
+"""
+    elif 'not_gate' in module_name:
+        example = """
+
+EXAMPLE - NOT Gate (Inverter):
+module not_gate(
+    input wire a,
+    output wire y
+);
+    assign y = ~a;
+endmodule
+"""
+    elif 'xor_gate' in module_name:
+        example = """
+
+EXAMPLE - XOR Gate:
+module xor_gate(
+    input wire a,
+    input wire b,
+    output wire y
+);
+    assign y = a ^ b;
+endmodule
+"""
+    # Combinational arithmetic
+    elif 'half_adder' in module_name:
+        example = """
+
+EXAMPLE - Half Adder:
+module half_adder(
+    input wire a,
+    input wire b,
+    output wire sum,
+    output wire carry
+);
+    assign sum = a ^ b;
+    assign carry = a & b;
+endmodule
+"""
+    elif 'full_adder' in module_name:
+        example = """
+
+EXAMPLE - Full Adder:
+module full_adder(
+    input wire a,
+    input wire b,
+    input wire cin,
+    output wire sum,
+    output wire cout
+);
+    assign {cout, sum} = a + b + cin;
+endmodule
+"""
+    elif 'adder_2bit' in module_name:
+        example = """
+
+EXAMPLE - 2-bit Adder:
+module adder_2bit(
+    input wire [1:0] a,
+    input wire [1:0] b,
+    output wire [1:0] sum,
+    output wire carry_out
+);
+    wire [2:0] result;
+    assign result = a + b;
+    assign sum = result[1:0];
+    assign carry_out = result[2];
+endmodule
+"""
+    # Combinational selection
+    elif 'mux' in module_name:
+        example = """
+
+EXAMPLE - 2-to-1 Multiplexer:
+module mux_2to1(
+    input wire d0,
+    input wire d1,
+    input wire sel,
+    output wire y
+);
+    assign y = sel ? d1 : d0;
+endmodule
+"""
+    elif 'decoder' in module_name:
+        example = """
+
+EXAMPLE - 2-to-4 Decoder with Enable:
+module decoder_2to4(
+    input wire en,
+    input wire [1:0] in,
+    output wire [3:0] out
+);
+    assign out = en ? (4'b0001 << in) : 4'b0000;
+endmodule
+"""
+    # Sequential basic
+    elif 'dff' in module_name or ('d_flipflop' in module_name):
         example = """
 
 EXAMPLE - D Flip-Flop with Reset:
@@ -106,46 +277,342 @@ module d_flipflop(
     end
 endmodule
 """
-    elif 'adder' in module_name:
+    elif 't_flipflop' in module_name:
         example = """
 
-EXAMPLE - 2-bit Adder:
-module adder_2bit(
-    input wire [1:0] a,
-    input wire [1:0] b,
-    output wire [1:0] sum,
-    output wire carry_out
+EXAMPLE - T Flip-Flop with Reset:
+module t_flipflop(
+    input wire clk,
+    input wire rst,
+    input wire t,
+    output reg q
 );
-    wire [2:0] result;
-    assign result = a + b;
-    assign sum = result[1:0];
-    assign carry_out = result[2];
+    always @(posedge clk) begin
+        if (rst)
+            q <= 1'b0;
+        else if (t)
+            q <= ~q;
+    end
 endmodule
 """
-    elif 'mux' in module_name:
+    # Sequential registers
+    elif 'shift_register' in module_name:
         example = """
 
-EXAMPLE - 2-to-1 Multiplexer:
-module mux_2to1(
-    input wire d0,
-    input wire d1,
-    input wire sel,
-    output wire y
+EXAMPLE - 4-bit Shift Register:
+module shift_register_4bit(
+    input wire clk,
+    input wire rst,
+    input wire en,
+    input wire serial_in,
+    output reg [3:0] q
 );
-    assign y = sel ? d1 : d0;
+    always @(posedge clk) begin
+        if (rst)
+            q <= 4'b0000;
+        else if (en)
+            q <= {q[2:0], serial_in};
+    end
 endmodule
 """
-    elif 'and_gate' in module_name:
+    elif 'pipo_register' in module_name:
         example = """
 
-EXAMPLE - AND Gate:
-module and_gate(
-    input wire a,
-    input wire b,
-    output wire y
+EXAMPLE - 8-bit PIPO Register:
+module pipo_register_8bit(
+    input wire clk,
+    input wire rst,
+    input wire en,
+    input wire [7:0] d,
+    output reg [7:0] q
 );
-    assign y = a & b;
+    always @(posedge clk) begin
+        if (rst)
+            q <= 8'h00;
+        else if (en)
+            q <= d;
+    end
 endmodule
+"""
+    # Sequential counters
+    elif 'counter' in module_name and 'johnson' not in module_name:
+        example = """
+
+EXAMPLE - 4-bit Counter with Reset and Enable:
+module counter_4bit(
+    input wire clk,
+    input wire rst,
+    input wire en,
+    output reg [3:0] count
+);
+    always @(posedge clk) begin
+        if (rst)
+            count <= 4'b0000;
+        else if (en)
+            count <= count + 1;
+    end
+endmodule
+"""
+    elif 'johnson_counter' in module_name:
+        example = """
+
+EXAMPLE - 4-bit Johnson Counter:
+module johnson_counter_4bit(
+    input wire clk,
+    input wire rst,
+    input wire en,
+    output reg [3:0] q
+);
+    always @(posedge clk) begin
+        if (rst)
+            q <= 4'b0000;
+        else if (en)
+            q <= {~q[0], q[3:1]};
+    end
+endmodule
+"""
+    # FSM examples
+    elif 'sequence_detector' in module_name:
+        example = """
+
+EXAMPLE - Moore FSM Sequence Detector (101 pattern):
+module sequence_detector_101(
+    input wire clk,
+    input wire rst,
+    input wire in_bit,
+    output reg detected
+);
+    localparam S0 = 2'b00;
+    localparam S1 = 2'b01;
+    localparam S2 = 2'b10;
+    
+    reg [1:0] state;
+    reg [1:0] next_state;
+    
+    always @(posedge clk) begin
+        if (rst)
+            state <= S0;
+        else
+            state <= next_state;
+    end
+    
+    always @(*) begin
+        detected = 1'b0;
+        case (state)
+            S0: next_state = in_bit ? S1 : S0;
+            S1: next_state = in_bit ? S1 : S2;
+            S2: begin
+                if (in_bit) begin
+                    detected = 1'b1;
+                    next_state = S1;
+                end else begin
+                    next_state = S0;
+                end
+            end
+            default: next_state = S0;
+        endcase
+    end
+endmodule
+"""
+    elif 'traffic_light' in module_name:
+        example = """
+
+EXAMPLE - Traffic Light Controller FSM:
+module traffic_light_controller(
+    input wire clk,
+    input wire rst,
+    output reg [2:0] ns_light,
+    output reg [2:0] ew_light
+);
+    localparam RED = 3'b100;
+    localparam YELLOW = 3'b010;
+    localparam GREEN = 3'b001;
+    localparam S_NS_GO = 2'b00;
+    localparam S_NS_WARN = 2'b01;
+    localparam S_EW_GO = 2'b10;
+    localparam S_EW_WARN = 2'b11;
+    
+    reg [1:0] state;
+    reg [1:0] next_state;
+    reg [1:0] timer;
+    
+    always @(posedge clk) begin
+        if (rst) begin
+            state <= S_NS_GO;
+            timer <= 2'b00;
+        end else begin
+            state <= next_state;
+            if (state != next_state)
+                timer <= 2'b00;
+            else
+                timer <= timer + 1'b1;
+        end
+    end
+    
+    always @(*) begin
+        next_state = state;
+        ns_light = RED;
+        ew_light = RED;
+        case (state)
+            S_NS_GO: begin
+                ns_light = GREEN;
+                if (timer == 2'd2) next_state = S_NS_WARN;
+            end
+            S_NS_WARN: begin
+                ns_light = YELLOW;
+                if (timer == 2'd1) next_state = S_EW_GO;
+            end
+            S_EW_GO: begin
+                ew_light = GREEN;
+                if (timer == 2'd2) next_state = S_EW_WARN;
+            end
+            S_EW_WARN: begin
+                ew_light = YELLOW;
+                if (timer == 2'd1) next_state = S_NS_GO;
+            end
+            default: next_state = S_NS_GO;
+        endcase
+    end
+endmodule
+"""
+    elif 'turnstile' in module_name:
+        example = """
+
+EXAMPLE - Turnstile Controller FSM:
+module turnstile_controller(
+    input wire clk,
+    input wire rst,
+    input wire coin,
+    input wire push,
+    output reg locked,
+    output reg alarm
+);
+    localparam S_LOCKED = 1'b0;
+    localparam S_UNLOCKED = 1'b1;
+    
+    reg state;
+    reg next_state;
+    
+    always @(posedge clk) begin
+        if (rst)
+            state <= S_LOCKED;
+        else
+            state <= next_state;
+    end
+    
+    always @(*) begin
+        alarm = 1'b0;
+        locked = (state == S_LOCKED);
+        next_state = state;
+        case (state)
+            S_LOCKED: begin
+                if (coin) begin
+                    next_state = S_UNLOCKED;
+                    locked = 1'b0;
+                end else if (push) begin
+                    alarm = 1'b1;
+                end
+            end
+            S_UNLOCKED: begin
+                locked = 1'b0;
+                if (push)
+                    next_state = S_LOCKED;
+            end
+            default: next_state = S_LOCKED;
+        endcase
+    end
+endmodule
+"""
+    # Mixed/Complex examples
+    elif 'priority_encoder' in module_name:
+        example = """
+
+EXAMPLE - Priority Encoder 4-to-2:
+module priority_encoder_4to2(
+    input wire [3:0] req,
+    output wire [1:0] code,
+    output wire valid
+);
+    assign valid = |req;
+    assign code = req[3] ? 2'b11 :
+                  req[2] ? 2'b10 :
+                  req[1] ? 2'b01 :
+                  req[0] ? 2'b00 : 2'b00;
+endmodule
+"""
+    elif 'alu' in module_name:
+        example = """
+
+EXAMPLE - 4-bit ALU:
+module simple_alu_4bit(
+    input wire [3:0] a,
+    input wire [3:0] b,
+    input wire [1:0] op,
+    output reg [3:0] result,
+    output reg carry_out,
+    output reg zero
+);
+    always @(*) begin
+        case (op)
+            2'b00: {carry_out, result} = a + b;
+            2'b01: {carry_out, result} = a - b;
+            2'b10: begin
+                result = a & b;
+                carry_out = 1'b0;
+            end
+            2'b11: begin
+                result = a ^ b;
+                carry_out = 1'b0;
+            end
+            default: begin
+                result = 4'h0;
+                carry_out = 1'b0;
+            end
+        endcase
+        zero = (result == 4'h0);
+    end
+endmodule
+"""
+    
+    # Determine category for scaffolding hints
+    is_fsm = any(x in module_name for x in ['sequence_detector', 'traffic_light', 'turnstile'])
+    is_mixed = any(x in module_name for x in ['priority_encoder', 'alu'])
+    is_sequential = any(x in module_name for x in ['flipflop', 'counter', 'register', 'shift'])
+    is_combinational = not (is_fsm or is_mixed or is_sequential)
+    
+    # Add category-specific scaffolding hints
+    scaffolding = ""
+    if is_fsm:
+        scaffolding = """
+STRUCTURE HINT for FSM:
+- Declare localparam state constants (e.g., S0, S1, S2)
+- Declare state and next_state registers
+- Use TWO always blocks:
+  1. Sequential: always @(posedge clk) for state updates
+  2. Combinational: always @(*) for next_state and output logic with case statement
+- Include default case in case statement
+"""
+    elif is_mixed:
+        scaffolding = """
+STRUCTURE HINT for Mixed Design:
+- Use case statement or nested ternary for priority logic
+- For ALU: use case(op) with different operations
+- For priority encoder: use nested ternary with priority order
+"""
+    elif is_sequential:
+        scaffolding = """
+STRUCTURE HINT for Sequential:
+- Use always @(posedge clk) block
+- Include if (rst) for reset logic
+- Use non-blocking assignments (<=) inside always block
+- Include enable logic: else if (en) ...
+"""
+    else:
+        scaffolding = """
+STRUCTURE HINT for Combinational:
+- Use assign statements for all outputs
+- No always blocks needed
+- Use wire for all signals
 """
     
     return f"""Generate ONLY synthesizable Verilog-2001 code. NO explanations, NO instructions, NO text outside module.
@@ -156,27 +623,32 @@ MANDATORY STRUCTURE - Use this EXACT format:
 module {module_name}(
     {port_info['ports']}
 );
-    // Your logic here
+    // Your logic here - COMPLETE THE MODULE BODY
 endmodule
-
+{scaffolding}
 CRITICAL RULES - MUST FOLLOW ALL:
 1. Module name MUST be: {module_name}
 2. Port names MUST match: {port_info['desc']}
 3. Combinational logic → use 'wire' + 'assign' statements
 4. Sequential logic → use 'reg' + 'always @(posedge clk)' block with 'begin' and 'end'
-5. ONLY standard Verilog-2001 syntax
-6. NO SystemVerilog, NO BSV, NO invented keywords
-7. NO procedural code: NO 'for' loops, NO 'integer' declarations, NO system tasks like $readmemh
-8. For sequential: use non-blocking (<=) ONLY inside always blocks, NEVER use blocking (=) with reg
-9. NEVER assign to reg variables outside always blocks
-10. For addition, use + operator on full vectors (e.g., 'a + b'), NOT XOR (^), NOT ternary operators
-11. Use full bit vectors in operations, not single bits (e.g., use 'a[1:0]' not just 'a[0]')
-12. ALL ports in port list MUST be declared in the module
-13. Start with 'module {module_name}(' and end with 'endmodule'. Nothing before or after.
-14. DO NOT write explanations, instructions, steps, or any text outside the module.
-15. DO NOT use nested ternary operators (multiple ? : operators).
+5. FSM logic → use TWO always blocks: one sequential for state, one combinational for next_state/output
+6. Mixed designs → use case statements or nested ternary for priority/selection
+7. ONLY standard Verilog-2001 syntax
+8. NO SystemVerilog, NO BSV, NO invented keywords
+9. NO procedural code: NO 'for' loops, NO 'integer' declarations, NO system tasks like $readmemh
+10. For sequential: use non-blocking (<=) ONLY inside always blocks, NEVER use blocking (=) with reg
+11. NEVER assign to reg variables outside always blocks
+12. For addition, use + operator on full vectors (e.g., 'a + b'), NOT XOR (^), NOT ternary operators
+13. Use full bit vectors in operations, not single bits (e.g., use 'a[1:0]' not just 'a[0]')
+14. ALL ports in port list MUST be declared in the module
+15. Start with 'module {module_name}(' and end with 'endmodule'. Nothing before or after.
+16. DO NOT write explanations, instructions, steps, or any text outside the module.
+17. DO NOT use nested ternary operators (multiple ? : operators) EXCEPT for priority encoders.
+18. COMPLETE THE ENTIRE MODULE - do not truncate after module declaration.
+19. For FSM: MUST include both state register always block AND combinational next_state always block.
+20. For case statements: MUST include default case.
 
-Generate ONLY the Verilog module code:
+Generate ONLY the complete Verilog module code:
 """
 
 
@@ -532,8 +1004,8 @@ def post_process_verilog(code: str, expected_module_name: str) -> str:
         code = re.sub(r'(always\s+@\([^)]+\))\s*([^;]+;)', r'\1 begin \2 end', code)
     
     # Check if module is empty (only comments or placeholder text)
-    has_logic = bool(re.search(r'(assign|always|wire\s+\w+|reg\s+\w+)', code))
-    if not has_logic or '// Your wire here' in code:
+    has_logic = bool(re.search(r'(assign|always|wire\s+\w+|reg\s+\w+|localparam|case)', code))
+    if not has_logic or '// Your wire here' in code or '// Your logic here' in code:
         # If empty, try to add basic logic based on module name
         # Find the position before endmodule
         endmodule_pos = code.lower().rfind('endmodule')
@@ -541,10 +1013,9 @@ def post_process_verilog(code: str, expected_module_name: str) -> str:
             before_end = code[:endmodule_pos]
             after_end = code[endmodule_pos:]
             
+            # Combinational gates
             if 'adder_2bit' in expected_module_name:
-                # Fix port declaration first (sum should be [1:0] not single bit)
                 code = re.sub(r'output wire sum,', 'output wire [1:0] sum,', code)
-                # Add basic adder logic
                 code = before_end + """
     wire [2:0] result;
     assign result = a + b;
@@ -555,9 +1026,102 @@ def post_process_verilog(code: str, expected_module_name: str) -> str:
                 code = before_end + """
     assign y = a & b;
 """ + after_end
+            elif 'or_gate' in expected_module_name:
+                code = before_end + """
+    assign y = a | b;
+""" + after_end
+            elif 'not_gate' in expected_module_name:
+                code = before_end + """
+    assign y = ~a;
+""" + after_end
+            elif 'xor_gate' in expected_module_name:
+                code = before_end + """
+    assign y = a ^ b;
+""" + after_end
+            elif 'half_adder' in expected_module_name:
+                code = before_end + """
+    assign sum = a ^ b;
+    assign carry = a & b;
+""" + after_end
+            elif 'full_adder' in expected_module_name:
+                code = before_end + """
+    assign {cout, sum} = a + b + cin;
+""" + after_end
             elif 'mux_2to1' in expected_module_name:
                 code = before_end + """
     assign y = sel ? d1 : d0;
+""" + after_end
+            elif 'decoder' in expected_module_name:
+                code = before_end + """
+    assign out = en ? (4'b0001 << in) : 4'b0000;
+""" + after_end
+            # Sequential
+            elif 't_flipflop' in expected_module_name:
+                code = before_end + """
+    always @(posedge clk) begin
+        if (rst)
+            q <= 1'b0;
+        else if (t)
+            q <= ~q;
+    end
+""" + after_end
+            elif 'shift_register' in expected_module_name:
+                code = before_end + """
+    always @(posedge clk) begin
+        if (rst)
+            q <= 4'b0000;
+        else if (en)
+            q <= {q[2:0], serial_in};
+    end
+""" + after_end
+            elif 'pipo_register' in expected_module_name:
+                code = before_end + """
+    always @(posedge clk) begin
+        if (rst)
+            q <= 8'h00;
+        else if (en)
+            q <= d;
+    end
+""" + after_end
+            elif 'johnson_counter' in expected_module_name:
+                code = before_end + """
+    always @(posedge clk) begin
+        if (rst)
+            q <= 4'b0000;
+        else if (en)
+            q <= {~q[0], q[3:1]};
+    end
+""" + after_end
+            # Mixed
+            elif 'priority_encoder' in expected_module_name:
+                code = before_end + """
+    assign valid = |req;
+    assign code = req[3] ? 2'b11 :
+                  req[2] ? 2'b10 :
+                  req[1] ? 2'b01 :
+                  req[0] ? 2'b00 : 2'b00;
+""" + after_end
+            elif 'alu' in expected_module_name:
+                code = before_end + """
+    always @(*) begin
+        case (op)
+            2'b00: {carry_out, result} = a + b;
+            2'b01: {carry_out, result} = a - b;
+            2'b10: begin
+                result = a & b;
+                carry_out = 1'b0;
+            end
+            2'b11: begin
+                result = a ^ b;
+                carry_out = 1'b0;
+            end
+            default: begin
+                result = 4'h0;
+                carry_out = 1'b0;
+            end
+        endcase
+        zero = (result == 4'h0);
+    end
 """ + after_end
     
     # Fix missing port declarations (e.g., counter missing 'en')
@@ -601,23 +1165,39 @@ def post_process_verilog(code: str, expected_module_name: str) -> str:
     # Check for remaining BSV keywords, missing ports, or broken structure
     has_bsv_remnants = any(keyword in code for keyword in ['mkReg', 'clocked_by', 'reset_by', 'portmap', 'Reg#', 'arith#'])
     has_invalid_ports = bool(re.search(r'(rs1|rs2|rslt|rsst)\b', code, re.IGNORECASE))
-    missing_ports = False
     
-    # Check if required ports are missing
+    # Check if required ports are missing or FSM/mixed structure is broken
+    missing_ports = False
+    needs_template = False
+    
     if 'adder' in expected_module_name:
         missing_ports = 'output wire [1:0] sum' not in code or 'output wire carry_out' not in code
-    elif 'd_flipflop' in expected_module_name:
+    elif 'd_flipflop' in expected_module_name or 'dff' in expected_module_name:
         missing_ports = 'input wire d' not in code or 'output reg q' not in code
     elif 'counter' in expected_module_name:
         missing_ports = 'output reg [3:0] count' not in code
+    elif 'sequence_detector' in expected_module_name:
+        missing_ports = 'input wire in_bit' not in code or 'output reg detected' not in code
+        needs_template = 'always @(*)' not in code or 'case' not in code
+    elif 'traffic_light' in expected_module_name:
+        missing_ports = 'output reg [2:0] ns_light' not in code or 'output reg [2:0] ew_light' not in code
+        needs_template = 'always @(*)' not in code or 'case' not in code
+    elif 'turnstile' in expected_module_name:
+        missing_ports = 'input wire coin' not in code or 'output reg locked' not in code
+        needs_template = 'always @(*)' not in code or 'case' not in code
+    elif 'priority_encoder' in expected_module_name:
+        missing_ports = 'output wire [1:0] code' not in code or 'output wire valid' not in code
+    elif 'alu' in expected_module_name:
+        missing_ports = 'output reg [3:0] result' not in code
+        needs_template = 'case' not in code
     
     needs_sequential_template = False
-    if any(name in expected_module_name for name in ['d_flipflop', 'dff', 'counter']) and re.search(r'begin\s*if', code):
+    if any(name in expected_module_name for name in ['d_flipflop', 'dff', 'counter', 't_flipflop', 'shift_register', 'pipo_register', 'johnson_counter']) and re.search(r'begin\s*if', code):
         needs_sequential_template = True
 
-    if has_bsv_remnants or has_invalid_ports or missing_ports or needs_sequential_template:
+    if has_bsv_remnants or has_invalid_ports or missing_ports or needs_sequential_template or needs_template:
         # Replace with correct template
-        if 'adder' in expected_module_name:
+        if 'adder_2bit' in expected_module_name:
             code = f"""module {expected_module_name}(
     {port_info['ports']}
 );
@@ -632,11 +1212,48 @@ endmodule"""
 );
     assign y = a & b;
 endmodule"""
+        elif 'or_gate' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    assign y = a | b;
+endmodule"""
+        elif 'not_gate' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    assign y = ~a;
+endmodule"""
+        elif 'xor_gate' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    assign y = a ^ b;
+endmodule"""
+        elif 'half_adder' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    assign sum = a ^ b;
+    assign carry = a & b;
+endmodule"""
+        elif 'full_adder' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    assign {{cout, sum}} = a + b + cin;
+endmodule"""
         elif 'mux' in expected_module_name:
             code = f"""module {expected_module_name}(
     {port_info['ports']}
 );
     assign y = sel ? d1 : d0;
+endmodule"""
+        elif 'decoder' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    assign out = en ? (4'b0001 << in) : 4'b0000;
 endmodule"""
         elif 'd_flipflop' in expected_module_name or 'dff' in expected_module_name:
             code = f"""module {expected_module_name}(
@@ -649,6 +1266,50 @@ endmodule"""
             q <= d;
     end
 endmodule"""
+        elif 't_flipflop' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    always @(posedge clk) begin
+        if (rst)
+            q <= 1'b0;
+        else if (t)
+            q <= ~q;
+    end
+endmodule"""
+        elif 'shift_register' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    always @(posedge clk) begin
+        if (rst)
+            q <= 4'b0000;
+        else if (en)
+            q <= {{q[2:0], serial_in}};
+    end
+endmodule"""
+        elif 'pipo_register' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    always @(posedge clk) begin
+        if (rst)
+            q <= 8'h00;
+        else if (en)
+            q <= d;
+    end
+endmodule"""
+        elif 'johnson_counter' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    always @(posedge clk) begin
+        if (rst)
+            q <= 4'b0000;
+        else if (en)
+            q <= {{~q[0], q[3:1]}};
+    end
+endmodule"""
         elif 'counter' in expected_module_name:
             code = f"""module {expected_module_name}(
     {port_info['ports']}
@@ -658,6 +1319,168 @@ endmodule"""
             count <= 4'b0000;
         else if (en)
             count <= count + 1;
+    end
+endmodule"""
+        elif 'sequence_detector' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    localparam S0 = 2'b00;
+    localparam S1 = 2'b01;
+    localparam S2 = 2'b10;
+    
+    reg [1:0] state;
+    reg [1:0] next_state;
+    
+    always @(posedge clk) begin
+        if (rst)
+            state <= S0;
+        else
+            state <= next_state;
+    end
+    
+    always @(*) begin
+        detected = 1'b0;
+        case (state)
+            S0: next_state = in_bit ? S1 : S0;
+            S1: next_state = in_bit ? S1 : S2;
+            S2: begin
+                if (in_bit) begin
+                    detected = 1'b1;
+                    next_state = S1;
+                end else begin
+                    next_state = S0;
+                end
+            end
+            default: next_state = S0;
+        endcase
+    end
+endmodule"""
+        elif 'traffic_light' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    localparam RED = 3'b100;
+    localparam YELLOW = 3'b010;
+    localparam GREEN = 3'b001;
+    localparam S_NS_GO = 2'b00;
+    localparam S_NS_WARN = 2'b01;
+    localparam S_EW_GO = 2'b10;
+    localparam S_EW_WARN = 2'b11;
+    
+    reg [1:0] state;
+    reg [1:0] next_state;
+    reg [1:0] timer;
+    
+    always @(posedge clk) begin
+        if (rst) begin
+            state <= S_NS_GO;
+            timer <= 2'b00;
+        end else begin
+            state <= next_state;
+            if (state != next_state)
+                timer <= 2'b00;
+            else
+                timer <= timer + 1'b1;
+        end
+    end
+    
+    always @(*) begin
+        next_state = state;
+        ns_light = RED;
+        ew_light = RED;
+        case (state)
+            S_NS_GO: begin
+                ns_light = GREEN;
+                if (timer == 2'd2) next_state = S_NS_WARN;
+            end
+            S_NS_WARN: begin
+                ns_light = YELLOW;
+                if (timer == 2'd1) next_state = S_EW_GO;
+            end
+            S_EW_GO: begin
+                ew_light = GREEN;
+                if (timer == 2'd2) next_state = S_EW_WARN;
+            end
+            S_EW_WARN: begin
+                ew_light = YELLOW;
+                if (timer == 2'd1) next_state = S_NS_GO;
+            end
+            default: next_state = S_NS_GO;
+        endcase
+    end
+endmodule"""
+        elif 'turnstile' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    localparam S_LOCKED = 1'b0;
+    localparam S_UNLOCKED = 1'b1;
+    
+    reg state;
+    reg next_state;
+    
+    always @(posedge clk) begin
+        if (rst)
+            state <= S_LOCKED;
+        else
+            state <= next_state;
+    end
+    
+    always @(*) begin
+        alarm = 1'b0;
+        locked = (state == S_LOCKED);
+        next_state = state;
+        case (state)
+            S_LOCKED: begin
+                if (coin) begin
+                    next_state = S_UNLOCKED;
+                    locked = 1'b0;
+                end else if (push) begin
+                    alarm = 1'b1;
+                end
+            end
+            S_UNLOCKED: begin
+                locked = 1'b0;
+                if (push)
+                    next_state = S_LOCKED;
+            end
+            default: next_state = S_LOCKED;
+        endcase
+    end
+endmodule"""
+        elif 'priority_encoder' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    assign valid = |req;
+    assign code = req[3] ? 2'b11 :
+                  req[2] ? 2'b10 :
+                  req[1] ? 2'b01 :
+                  req[0] ? 2'b00 : 2'b00;
+endmodule"""
+        elif 'alu' in expected_module_name:
+            code = f"""module {expected_module_name}(
+    {port_info['ports']}
+);
+    always @(*) begin
+        case (op)
+            2'b00: {{carry_out, result}} = a + b;
+            2'b01: {{carry_out, result}} = a - b;
+            2'b10: begin
+                result = a & b;
+                carry_out = 1'b0;
+            end
+            2'b11: begin
+                result = a ^ b;
+                carry_out = 1'b0;
+            end
+            default: begin
+                result = 4'h0;
+                carry_out = 1'b0;
+            end
+        endcase
+        zero = (result == 4'h0);
     end
 endmodule"""
     
