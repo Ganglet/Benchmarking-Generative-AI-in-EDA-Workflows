@@ -58,7 +58,10 @@ curl -fsSL https://ollama.com/install.sh | sh
 # Pull models
 ollama pull llama3
 ollama pull tinyllama
+ollama pull starcoder2:7b
 ```
+
+**Note**: StarCoder2 can also be used via HuggingFace Transformers. See `model_interface.py` for configuration options.
 
 ### Running Your First Benchmark
 
@@ -68,12 +71,19 @@ cd Quantitative
 python dataset_loader.py
 ```
 
-2. **Run Mini Benchmark:**
+2. **Run Phase 2 Benchmark (Recommended):**
+```bash
+python run_phase2.py
+```
+
+This will evaluate all 20 tasks with 3 repetitions per model and save results to `../results/phase2_benchmark/`.
+
+**Alternative: Run Mini Benchmark:**
 ```bash
 python run_mini_benchmark.py
 ```
 
-This will evaluate 5 tasks with available models and save results to `../results/mini_benchmark/`.
+This evaluates 5 starter tasks and saves results to `../results/mini_benchmark/`.
 
 3. **Analyze Results:**
 ```bash
@@ -107,7 +117,7 @@ python run_mini_benchmark.py
 ## 📁 Project Structure
 
 ```
-Paper_Own/
+Paper/
 ├── Quantitative/
 │   ├── Eval_Pipeline.py          # Main evaluation pipeline
 │   ├── model_interface.py        # AI model integration (Ollama/HF)
@@ -115,13 +125,24 @@ Paper_Own/
 │   ├── statistical_analysis.py   # Statistical analysis module
 │   ├── visualizations.py         # Plotting and visualization
 │   ├── run_mini_benchmark.py     # Quick test runner
+│   ├── run_phase1.py             # Phase 1: Few-shot prompting
+│   ├── run_phase2.py             # Phase 2: Constrained prompts + post-processing
+│   ├── run_phase3.py             # Phase 3: Iterative refinement
+│   ├── Research_Data/            # Benchmark analysis reports
+│   │   ├── 1st_Benchmark_Results.md
+│   │   ├── 6th_Benchmark_Results.md
+│   │   ├── 7th_Benchmark_results.md
+│   │   └── 8th_Benchmark_Results.md
 │   └── dataset/
-│       ├── tasks.json            # Task metadata
-│       ├── combinational/        # Combinational circuits
-│       ├── sequential/           # Sequential circuits
-│       ├── fsm/                  # Finite state machines
-│       └── mixed/                # Mixed designs
+│       ├── tasks.json            # Task metadata (20 tasks)
+│       ├── combinational/        # Combinational circuits (9 tasks)
+│       ├── sequential/           # Sequential circuits (6 tasks)
+│       ├── fsm/                  # Finite state machines (3 tasks)
+│       └── mixed/                # Mixed designs (2 tasks)
 ├── results/                      # Generated outputs
+│   ├── Benchmark_6_Results/      # Phase 2 with sequential normalization
+│   ├── Benchmark_7_Results/      # Phase 2 full dataset expansion
+│   └── Benchmark_8_Results/      # Enhanced Phase 2 with comprehensive examples
 ├── figures/                      # Visualization outputs
 ├── requirements.txt              # Python dependencies
 ├── Dockerfile                    # Container definition
@@ -200,12 +221,13 @@ model = HuggingFaceInterface("org/model-name")
 
 ## 📊 Current Dataset
 
-- ✅ **5 starter tasks** (3 combinational, 2 sequential)
+- ✅ **20 benchmark tasks** (fully implemented and tested)
+  - 9 combinational circuits (gates, adders, mux, decoder)
+  - 6 sequential circuits (flip-flops, registers, counters)
+  - 3 FSM designs (sequence detector, traffic light, turnstile)
+  - 2 mixed/complex designs (priority encoder, ALU)
 - 🚧 **Expanding to 120 tasks** (in progress)
-  - 40 combinational circuits
-  - 40 sequential circuits
-  - 20 FSM designs
-  - 20 mixed designs
+  - Target: 40 combinational, 40 sequential, 20 FSM, 20 mixed
 
 ## 🛠️ Development Roadmap
 
@@ -216,19 +238,34 @@ model = HuggingFaceInterface("org/model-name")
 - [x] Statistical analysis
 - [x] Visualization module
 
-### Phase 2: Dataset Expansion 🚧
-- [ ] Expand to 30 tasks (Week 1-2)
-- [ ] Expand to 60 tasks (Week 3-4)
-- [ ] Reach 120 tasks target (Week 5-6)
+### Phase 2: Enhanced Prompting & Post-Processing ✅
+- [x] Constrained prompts with exact module/port specifications
+- [x] Comprehensive examples for all task types (20 tasks)
+- [x] Enhanced post-processing with FSM/mixed template generation
+- [x] Sequential normalization for reliable sequential designs
+- [x] Category-specific scaffolding to prevent truncation
+- [x] Full 20-task benchmark evaluation (8th benchmark)
 
-### Phase 3: Advanced Features 📋
+**Key Achievements:**
+- **FSM Breakthrough**: StarCoder2 achieves 66.7% syntax validity for FSM tasks (previously 0%)
+- **Mixed Design Success**: StarCoder2 achieves 66.7% functional correctness on priority encoder
+- **Sequential Expansion**: All models handle expanded sequential library (T flip-flop, shift register, PIPO register)
+- **Overall Improvement**: 70% syntax validity (Llama-3), 55% (StarCoder2), 65% (TinyLlama)
+
+### Phase 3: Dataset Expansion 🚧
+- [ ] Expand to 30 tasks
+- [ ] Expand to 60 tasks
+- [ ] Reach 120 tasks target
+
+### Phase 4: Advanced Features 📋
 - [ ] Fault injection for testbench evaluation
 - [ ] Prompt template variations
 - [ ] Coverage analysis
 - [ ] Error taxonomy
+- [ ] FSM functional correctness refinement
 
-### Phase 4: Full Benchmark 📋
-- [ ] Run complete experiments
+### Phase 5: Full Benchmark & Publication 📋
+- [ ] Run complete experiments on expanded dataset
 - [ ] Generate publication-ready results
 - [ ] Write research paper
 
@@ -266,5 +303,25 @@ Contributions welcome! Please:
 
 ---
 
-**Status**: Active Development | **Last Updated**: October 2025
+## 📈 Latest Benchmark Results (8th Benchmark)
+
+**Enhanced Phase 2 with Comprehensive Examples and Post-Processing**
+
+| Model | Syntax Validity | Simulation Pass | Generation Time |
+|-------|----------------|-----------------|-----------------|
+| **Llama-3-8B-Large** | 70.0% (σ=0.462) | 58.3% (σ=0.497) | 5.14s (σ=4.66s) |
+| **StarCoder2-7B-Medium** | 55.0% (σ=0.502) | 35.0% (σ=0.481) | 3.46s (σ=5.82s) |
+| **TinyLlama-1.1B-Small** | 65.0% (σ=0.481) | 45.0% (σ=0.502) | 4.71s (σ=2.24s) |
+
+**Key Breakthroughs:**
+- ✅ **FSM Syntax Validity**: StarCoder2 achieves 66.7% syntax validity for FSM tasks (previously 0%)
+- ✅ **Mixed Design Success**: StarCoder2 achieves 66.7% functional correctness on priority encoder
+- ✅ **Sequential Expansion**: All models handle T flip-flop, shift register, and PIPO register
+- ✅ **Overall Improvement**: Significant gains from 7th to 8th benchmark across all models
+
+See `Quantitative/Research_Data/8th_Benchmark_Results.md` for detailed analysis.
+
+---
+
+**Status**: Active Development | **Last Updated**: November 2025
 
