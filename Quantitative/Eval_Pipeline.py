@@ -51,6 +51,19 @@ class EvaluationMetrics:
     tb_generated: bool
     fault_detection_ratio: Optional[float]
     
+    # Phase 4: Iterative Refinement and Confidence
+    iteration_count: int = 1
+    confidence_log_prob: Optional[float] = None
+    confidence_entropy: Optional[float] = None
+    waveform_diff_summary: Optional[str] = None
+    formal_equiv_status: Optional[str] = None
+    semantic_repair_applied: List[str] = None
+    
+    def __post_init__(self):
+        """Initialize default values for optional fields"""
+        if self.semantic_repair_applied is None:
+            self.semantic_repair_applied = []
+    
     def to_dict(self):
         return asdict(self)
 
@@ -102,39 +115,110 @@ class HDLCompiler:
 class HDLSimulator:
     """Runs simulation and compares outputs"""
     
-    def simulate(self, hdl_file: Path, testbench: Path, output_dir: Path) -> tuple[bool, int, int]:
+    def simulate(
+        self, 
+        hdl_file: Path, 
+        testbench: Path, 
+        output_dir: Path,
+        generate_vcd: bool = False
+    ) -> tuple[bool, int, int, Optional[Path]]:
         """
         Simulate HDL with testbench
-        Returns: (passed, tests_passed, tests_total)
+        
+        Args:
+            hdl_file: Path to HDL file
+            testbench: Path to testbench file
+            output_dir: Directory for output files
+            generate_vcd: Whether to generate VCD file
+            
+        Returns:
+            Tuple of (passed, tests_passed, tests_total, vcd_path)
         """
+        vcd_path = None
         try:
+            # Use testbench with VCD if requested
+            tb_to_use = testbench
+            if generate_vcd:
+                # Check if testbench already has $dumpvars
+                tb_content = testbench.read_text()
+                if "$dumpvars" not in tb_content and "$dumpfile" not in tb_content:
+                    # Inject VCD dump
+                    tb_with_vcd = output_dir / "testbench_with_vcd.v"
+                    modified_content = self._inject_vcd_dump(tb_content)
+                    tb_with_vcd.write_text(modified_content)
+                    tb_to_use = tb_with_vcd
+            
             # Compile with testbench
             compile_result = subprocess.run(
                 ["iverilog", "-o", str(output_dir / "sim.vvp"), 
-                 str(hdl_file), str(testbench)],
+                 str(hdl_file), str(tb_to_use)],
                 capture_output=True,
                 text=True,
                 timeout=30
             )
             
             if compile_result.returncode != 0:
-                return False, 0, 0
+                return False, 0, 0, None
             
             # Run simulation
             sim_result = subprocess.run(
                 ["vvp", str(output_dir / "sim.vvp")],
                 capture_output=True,
                 text=True,
-                timeout=30
+                timeout=30,
+                cwd=str(output_dir)
             )
+            
+            # Check for VCD file
+            if generate_vcd:
+                vcd_path = output_dir / "waveform.vcd"
+                if not vcd_path.exists():
+                    # Try to find VCD file
+                    vcd_files = list(output_dir.glob("*.vcd"))
+                    if vcd_files:
+                        vcd_path = vcd_files[0]
+                    else:
+                        vcd_path = None
             
             # Parse results
             passed, total = self._parse_simulation_output(sim_result.stdout)
-            return passed == total, passed, total
+            return passed == total, passed, total, vcd_path
             
         except Exception as e:
             print(f"Simulation error: {e}")
-            return False, 0, 0
+            return False, 0, 0, None
+    
+    def _inject_vcd_dump(self, tb_content: str) -> str:
+        """Inject $dumpvars into testbench content"""
+        # Try to find module instantiation (usually "dut")
+        if "dut" in tb_content.lower():
+            dut_name = "dut"
+        else:
+            # Try to find first module instantiation
+            import re
+            match = re.search(r'\s+(\w+)\s+(\w+)\s*\(', tb_content)
+            if match:
+                dut_name = match.group(2)
+            else:
+                dut_name = "dut"
+        
+        # Add VCD dump in initial block
+        vcd_code = f"""
+    $dumpfile("waveform.vcd");
+    $dumpvars(0, {dut_name});
+"""
+        
+        if "initial begin" in tb_content:
+            # Add after initial begin
+            tb_content = tb_content.replace(
+                "initial begin",
+                f"initial begin{vcd_code}"
+            )
+        else:
+            # Add initial block at start
+            tb_content = f"initial begin{vcd_code}end\n\n" + tb_content
+        
+        return tb_content
     
     def _parse_simulation_output(self, output: str) -> tuple[int, int]:
         """Parse test results from simulation output"""

@@ -6,7 +6,7 @@ Supports Ollama (local) and HuggingFace Transformers
 import json
 import time
 import requests
-from typing import Optional, Dict, Tuple
+from typing import Optional, Dict, Tuple, List
 from pathlib import Path
 
 class OllamaInterface:
@@ -95,6 +95,51 @@ class OllamaInterface:
         except Exception as e:
             print(f"Error during generation: {e}")
             return self._fallback_code(), time.time() - start_time
+    
+    def generate_with_confidence(
+        self,
+        specification: str,
+        prompt_template: str = "A",
+        temperature: float = 0.0,
+        max_tokens: int = 512,
+        num_samples: int = 3
+    ) -> Tuple[str, float, Optional[List[float]], float]:
+        """
+        Generate HDL with confidence metrics
+        
+        Args:
+            specification: Natural language description
+            prompt_template: Template ID
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens
+            num_samples: Number of samples for entropy calculation
+            
+        Returns:
+            Tuple of (code, gen_time, log_probs, entropy)
+            log_probs may be None if not available
+        """
+        # Generate primary sample
+        code, gen_time = self.generate_hdl(specification, prompt_template, temperature, max_tokens)
+        
+        # Generate additional samples for entropy (if temperature > 0)
+        samples = [code]
+        if temperature > 0 and num_samples > 1:
+            for _ in range(num_samples - 1):
+                sample_code, _ = self.generate_hdl(
+                    specification, prompt_template, temperature, max_tokens
+                )
+                samples.append(sample_code)
+        
+        # Compute entropy from samples
+        from confidence_tracker import ConfidenceTracker
+        tracker = ConfidenceTracker()
+        entropy = tracker.compute_entropy(samples)
+        
+        # Log probabilities not available from Ollama API directly
+        # Would need model API support for this
+        log_probs = None
+        
+        return code, gen_time, log_probs, entropy
     
     def _construct_prompt(self, specification: str, template: str = "A") -> str:
         """Build prompt based on template type"""

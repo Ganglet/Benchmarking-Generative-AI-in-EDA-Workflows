@@ -149,6 +149,214 @@ Paper/
 └── README.md                     # This file
 ```
 
+## 📊 Benchmark Test History
+
+This section documents all 9 benchmark tests, which files were used, and their key features.
+
+### Core Files (Used in All Benchmarks)
+- **`Eval_Pipeline.py`** - Main evaluation pipeline (compilation, simulation, metrics)
+- **`model_interface.py`** - AI model integration (Ollama/HuggingFace interfaces)
+- **`dataset_loader.py`** - Task loading and validation utilities
+- **`instruction.json`** - Configuration and methodology specifications
+
+### Analysis Tools (Post-Processing)
+- **`statistical_analysis.py`** - Standalone statistical analysis tool
+- **`visualizations.py`** - Standalone visualization generation tool
+
+---
+
+### Benchmark 1: Initial Pipeline Test
+**Runner**: `run_phase1.py`  
+**Methodology**: Phase 1 - Few-shot prompting  
+**Tasks**: 5 tasks (first 5 from dataset)  
+**Models**: Llama-3-8B, TinyLlama-1.1B  
+**Repetitions**: 1 per task  
+**Key Features**:
+- Basic few-shot prompting with examples
+- No post-processing
+- System configuration validation (EDA tools)
+
+**Results**: `results/Benchmark_1&2_Results/`  
+**Analysis**: `Research_Data/1st_Benchmark_Results.md`
+
+---
+
+### Benchmark 2: Constrained Prompts Introduction
+**Runner**: `run_phase2.py`  
+**Methodology**: Phase 2 - Constrained prompts + post-processing  
+**Tasks**: 5 tasks  
+**Models**: Llama-3-8B, TinyLlama-1.1B  
+**Repetitions**: 1 per task  
+**Key Features**:
+- Task-specific module/port name constraints
+- Basic post-processing fixes
+- Module name extraction and correction
+
+**Results**: `results/Benchmark_1&2_Results/`  
+**Analysis**: `Research_Data/2nd_Benchmark_Results.md`
+
+---
+
+### Benchmark 3: Post-Processing Refinement
+**Runner**: `run_phase2.py`  
+**Methodology**: Phase 2 - Enhanced post-processing  
+**Tasks**: 5 tasks  
+**Models**: Llama-3-8B, TinyLlama-1.1B  
+**Repetitions**: 1 per task  
+**Key Features**:
+- Improved post-processing with SystemVerilog→Verilog conversion
+- BSV construct removal
+- Port name normalization
+
+**Results**: `results/Benchmark_3&4_Results/`  
+**Analysis**: `Research_Data/3rd_Benchmark_Results.md`
+
+---
+
+### Benchmark 4: Statistical Analysis Introduction
+**Runner**: `run_phase2.py`  
+**Methodology**: Phase 2 + Statistical analysis (3 repetitions)  
+**Tasks**: 5 tasks  
+**Models**: Llama-3-8B, TinyLlama-1.1B  
+**Repetitions**: 3 per task (per `instruction.json`)  
+**Key Features**:
+- Multiple repetitions for statistical significance
+- Mean rates with standard deviations (σ)
+- Variance quantification
+
+**Results**: `results/Benchmark_3&4_Results/`  
+**Analysis**: `Research_Data/4th_Benchmark_Results.md`
+
+---
+
+### Benchmark 5: Medium Model Introduction
+**Runner**: `run_phase2.py`  
+**Methodology**: Phase 2 + StarCoder2-7B addition  
+**Tasks**: 5 tasks  
+**Models**: Llama-3-8B, StarCoder2-7B, TinyLlama-1.1B  
+**Repetitions**: 3 per task  
+**Key Features**:
+- Three-tier model comparison (Large/Medium/Small)
+- StarCoder2 code-specialized model evaluation
+- Sequential logic performance analysis
+
+**Results**: `results/Benchmark_5_Results/`  
+**Analysis**: `Research_Data/5th_Benchmark_Results.md`
+
+---
+
+### Benchmark 6: Sequential Normalization Upgrade
+**Runner**: `run_phase2.py`  
+**Methodology**: Phase 2 + Sequential normalization post-processing  
+**Tasks**: 5 tasks  
+**Models**: Llama-3-8B, StarCoder2-7B, TinyLlama-1.1B  
+**Repetitions**: 3 per task  
+**Key Features**:
+- Enhanced `post_process_verilog()` with sequential normalization
+- Enforced `begin/end` structure for sequential blocks
+- Sequential template matching and repair
+- DFF and counter reliability improvements
+
+**Results**: `results/Benchmark_6_Results/`  
+**Analysis**: `Research_Data/6th_Benchmark_Results.md`
+
+---
+
+### Benchmark 7: Full Dataset Expansion
+**Runner**: `run_phase2.py`  
+**Methodology**: Phase 2 + Full 20-task dataset  
+**Tasks**: 20 tasks (9 combinational, 6 sequential, 3 FSM, 2 mixed)  
+**Models**: Llama-3-8B, StarCoder2-7B, TinyLlama-1.1B  
+**Repetitions**: 3 per task  
+**Key Features**:
+- Complete benchmark coverage
+- Category-specific performance analysis
+- FSM and mixed design challenges exposed
+
+**Results**: `results/Benchmark_7_Results/`  
+**Analysis**: `Research_Data/7th_Benchmark_results.md`
+
+---
+
+### Benchmark 8: Comprehensive Examples & Enhanced Post-Processing
+**Runner**: `run_phase2.py`  
+**Methodology**: Phase 2 + Comprehensive examples for all task types  
+**Tasks**: 20 tasks  
+**Models**: Llama-3-8B, StarCoder2-7B, TinyLlama-1.1B  
+**Repetitions**: 3 per task  
+**Key Features**:
+- Complete examples for all task categories (combinational, sequential, FSM, mixed)
+- Enhanced post-processing with FSM/mixed template generation
+- Category-specific scaffolding to prevent truncation
+- FSM syntax validity breakthrough (StarCoder2: 0% → 66.7%)
+
+**Results**: `results/Benchmark_8_Results/`  
+**Analysis**: `Research_Data/8th_Benchmark_Results.md`
+
+---
+
+### Benchmark 9: Semantic-Aware Iterative Refinement (Phase 4)
+**Runner**: `run_phase4.py`  
+**Methodology**: Phase 4 - Semantic-aware iterative refinement  
+**Tasks**: 20 tasks  
+**Models**: Llama-3-8B, StarCoder2-7B, TinyLlama-1.1B  
+**Repetitions**: 3 per task  
+**Key Features**:
+- **Semantic repair components**:
+  - `waveform_analyzer.py` - Waveform difference analysis
+  - `formal_verifier.py` - Formal equivalence checking
+  - `ast_repair.py` - AST-based code repair
+  - `semantic_repair.py` - Orchestrates semantic repair tools
+- **Iterative evaluation**:
+  - `iterative_evaluator.py` - Adaptive iterative refinement loop
+  - `feedback_generator.py` - Error feedback generation
+  - `confidence_tracker.py` - Confidence modeling (entropy tracking)
+- **Configuration**:
+  - `phase4_config.py` - Phase 4 feature flags and settings
+- **Imports from Phase 2**:
+  - Uses `extract_module_name()`, `get_port_spec()`, `get_constrained_prompt()`, `post_process_verilog()` from `run_phase2.py`
+
+**Results**: `results/Benchmark_9_Results/`  
+**Analysis**: `Research_Data/` (if available)
+
+---
+
+### File Usage Summary
+
+| File | Benchmarks Used | Purpose |
+|------|----------------|---------|
+| `run_phase1.py` | 1 | Phase 1: Few-shot prompting baseline |
+| `run_phase2.py` | 2-8 | Phase 2: Constrained prompts + post-processing (evolved across benchmarks) |
+| `run_phase3.py` | None | Phase 3: Iterative refinement (not used in final benchmarks) |
+| `run_phase4.py` | 9 | Phase 4: Semantic-aware iterative refinement |
+| `waveform_analyzer.py` | 9 | Waveform analysis for semantic repair |
+| `formal_verifier.py` | 9 | Formal verification for semantic repair |
+| `ast_repair.py` | 9 | AST-based code repair |
+| `semantic_repair.py` | 9 | Semantic repair orchestrator |
+| `iterative_evaluator.py` | 9 | Adaptive iterative evaluation loop |
+| `feedback_generator.py` | 9 | Error feedback generation |
+| `confidence_tracker.py` | 9 | Confidence modeling and entropy tracking |
+| `phase4_config.py` | 9 | Phase 4 configuration |
+
+---
+
+### Evolution of Features
+
+**Phase 1 → Phase 2 (Benchmarks 1-8)**:
+- Few-shot prompting → Constrained prompts with exact module/port specs
+- No post-processing → Comprehensive post-processing
+- Single runs → Statistical analysis (3 repetitions)
+- 5 tasks → 20 tasks (full dataset)
+- 2 models → 3 models (added StarCoder2)
+- Basic fixes → Sequential normalization + FSM/mixed templates
+
+**Phase 2 → Phase 4 (Benchmark 9)**:
+- Single-pass generation → Iterative refinement with feedback
+- Syntax-only validation → Semantic validation (waveform, formal verification)
+- Static post-processing → Adaptive AST-based repair
+- No confidence tracking → Confidence modeling with entropy
+- Fixed methodology → Adaptive stopping based on confidence
+
 ## 📖 Usage Examples
 
 ### Test a Single Model:
