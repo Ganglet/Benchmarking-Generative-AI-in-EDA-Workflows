@@ -488,20 +488,12 @@ model = HuggingFaceInterface("org/model-name")
 }
 ```
 
-## 📄 License
-
-[Your License Choice]
-
 ## 🤝 Contributing
 
 Contributions welcome! Please:
 1. Fork the repository
 2. Create a feature branch
 3. Submit a pull request
-
-## 📧 Contact
-
-[Your contact information]
 
 ## 🙏 Acknowledgments
 
@@ -511,35 +503,15 @@ Contributions welcome! Please:
 
 ---
 
-## 📈 Latest Benchmark Results (8th Benchmark)
+## License
 
-**Enhanced Phase 2 with Comprehensive Examples and Post-Processing**
+The **source code** in this repository is released under the **MIT License**.  
+See: [LICENSE](LICENSE)
 
-| Model | Syntax Validity | Simulation Pass | Generation Time |
-|-------|----------------|-----------------|-----------------|
-| **Llama-3-8B-Large** | 70.0% (σ=0.462) | 58.3% (σ=0.497) | 5.14s (σ=4.66s) |
-| **StarCoder2-7B-Medium** | 55.0% (σ=0.502) | 35.0% (σ=0.481) | 3.46s (σ=5.82s) |
-| **TinyLlama-1.1B-Small** | 65.0% (σ=0.481) | 45.0% (σ=0.502) | 4.71s (σ=2.24s) |
-
-**Key Breakthroughs:**
-- ✅ **FSM Syntax Validity**: StarCoder2 achieves 66.7% syntax validity for FSM tasks (previously 0%)
-- ✅ **Mixed Design Success**: StarCoder2 achieves 66.7% functional correctness on priority encoder
-- ✅ **Sequential Expansion**: All models handle T flip-flop, shift register, and PIPO register
-- ✅ **Overall Improvement**: Significant gains from 7th to 8th benchmark across all models
-
-See `Quantitative/Research_Data/8th_Benchmark_Results.md` for detailed analysis.
+The **dataset files** (reference Verilog, testbenches, and `tasks.json`) are released under the  
+**Creative Commons Attribution–NonCommercial 4.0 License (CC BY-NC 4.0)**.  
+See: [DATASET_LICENSE](DATASET_LICENSE)
 
 ---
 
 **Status**: Active Development | **Last Updated**: November 2025
-
----
-
-## License
-
-The code in this repository is released under the MIT License.
-See LICENSE for details.
-
-The Verilog reference designs, dataset (tasks.json), and testbenches are
-released under the Creative Commons CC BY-NC 4.0 License.
-See DATASET_LICENSE for details.
