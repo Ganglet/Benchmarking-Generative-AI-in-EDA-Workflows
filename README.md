@@ -533,3 +533,13 @@ See `Quantitative/Research_Data/8th_Benchmark_Results.md` for detailed analysis.
 
 **Status**: Active Development | **Last Updated**: November 2025
 
+---
+
+## License
+
+The code in this repository is released under the MIT License.
+See LICENSE for details.
+
+The Verilog reference designs, dataset (tasks.json), and testbenches are
+released under the Creative Commons CC BY-NC 4.0 License.
+See DATASET_LICENSE for details.
