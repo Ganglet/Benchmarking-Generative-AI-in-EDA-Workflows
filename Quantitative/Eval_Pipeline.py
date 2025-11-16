@@ -58,6 +58,8 @@ class EvaluationMetrics:
     waveform_diff_summary: Optional[str] = None
     formal_equiv_status: Optional[str] = None
     semantic_repair_applied: List[str] = None
+    # Fast-path diagnostics (Phase 4 scaling)
+    fast_skip_reason: Optional[str] = None
     
     def __post_init__(self):
         """Initialize default values for optional fields"""

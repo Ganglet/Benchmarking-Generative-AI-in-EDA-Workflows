@@ -9,6 +9,7 @@ import json
 import statistics
 from pathlib import Path
 from collections import defaultdict
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from dataset_loader import load_tasks_from_json, print_dataset_stats, validate_dataset
@@ -28,6 +29,91 @@ import time
 # Configuration
 REPETITIONS_PER_PROMPT = 3
 TEMPERATURE = 0.0
+
+
+def get_task_tier(task) -> int:
+    """
+    Lightweight heuristic to bucket tasks into tiers for fast-path behavior.
+    
+    Tier 0 (trivial): basic gates and mux.
+    Tier 1 (simple): adders, simple counters, basic sequential.
+    Tier 2 (complex): FSM, mixed, Johnson counter, richer sequential.
+    """
+    tid = task.task_id
+    cat = getattr(task, "category", "")
+    
+    if cat == "combinational":
+        if any(
+            name in tid
+            for name in (
+                "and_gate",
+                "or_gate",
+                "not_gate",
+                "xor_gate",
+                "mux_2to1",
+            )
+        ):
+            return 0
+        return 1
+    
+    if cat == "sequential":
+        if "dff" in tid or "counter_4bit" in tid:
+            return 1
+        # Johnson counter, shift register, PIPO, T flip-flop are harder
+        return 2
+    
+    if cat in ("fsm", "mixed"):
+        return 2
+    
+    # Fallback
+    return 1
+
+
+def get_eval_settings_for_task(task, config: Phase4Config):
+    """
+    Compute evaluation settings (tier, max iterations, waveform/formal flags)
+    for a given task based on the global Phase 4 configuration.
+    """
+    mode = getattr(config, "MODE", "fast")
+    tier = get_task_tier(task) if config.ENABLE_TASK_TIERS else 2
+    
+    # Strict mode → use full configuration without shortcuts
+    if mode == "strict":
+        return {
+            "tier": tier,
+            "max_iterations": config.MAX_ITERATIONS,
+            "enable_waveform": config.ENABLE_WAVEFORM_ANALYSIS,
+            "enable_formal": config.ENABLE_FORMAL_VERIFICATION,
+        }
+    
+    # Fast mode: tier-specific behavior
+    if tier == 0:  # trivial
+        max_iters = 1
+        enable_waveform = False
+        enable_formal = False
+    elif tier == 1:  # simple
+        max_iters = min(config.MAX_ITERS_SEQUENTIAL, config.MAX_ITERATIONS)
+        enable_waveform = False
+        enable_formal = False
+    else:  # tier 2, complex
+        # Use category-aware caps when available
+        if task.category == "combinational":
+            max_iters = min(config.MAX_ITERS_COMBINATIONAL, config.MAX_ITERATIONS)
+        elif task.category == "sequential":
+            max_iters = min(config.MAX_ITERS_SEQUENTIAL, config.MAX_ITERATIONS)
+        elif task.category == "mixed":
+            max_iters = min(config.MAX_ITERS_MIXED, config.MAX_ITERATIONS)
+        else:  # fsm or unknown
+            max_iters = min(config.MAX_ITERS_FSM, config.MAX_ITERATIONS)
+        enable_waveform = config.ENABLE_WAVEFORM_ANALYSIS
+        enable_formal = config.ENABLE_FORMAL_VERIFICATION
+    
+    return {
+        "tier": tier,
+        "max_iterations": max_iters,
+        "enable_waveform": enable_waveform,
+        "enable_formal": enable_formal,
+    }
 
 
 def compute_statistics(all_runs):
@@ -88,9 +174,9 @@ def compute_statistics(all_runs):
 
 
 def main():
-    print("="*70)
+    print("=" * 70)
     print("PHASE 4: SEMANTIC-AWARE ITERATIVE REFINEMENT")
-    print("="*70)
+    print("=" * 70)
     
     # Load configuration
     config = Phase4Config()
@@ -103,6 +189,11 @@ def main():
     print(f"  • Formal verification: {config.ENABLE_FORMAL_VERIFICATION}")
     print(f"  • AST repair: {config.ENABLE_AST_REPAIR}")
     print(f"  • Confidence tracking: {config.CONFIDENCE_TRACKING}")
+    print(f"  • Mode: {config.MODE}")
+    print(f"  • Task tiers enabled: {config.ENABLE_TASK_TIERS}")
+    print(f"  • Entropy gating: {config.ENABLE_ENTROPY_GATING} (threshold={config.ENTROPY_THRESHOLD})")
+    print(f"  • Generation cache: {config.ENABLE_GENERATION_CACHE}")
+    print(f"  • Task max runtime: {config.TASK_MAX_RUNTIME_SECONDS}s")
     
     # Load dataset
     dataset_path = Path(__file__).parent / "dataset" / "tasks.json"
@@ -174,9 +265,9 @@ def main():
     test_tasks = tasks
     total_tasks = len(test_tasks)
     
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("RUNNING PHASE 4 BENCHMARK")
-    print("="*70)
+    print("=" * 70)
     print("\nFeatures:")
     print("  ✓ Semantic-aware post-processing (waveform diff, formal verification, AST repair)")
     print("  ✓ Adaptive iterative refinement loop")
@@ -197,7 +288,20 @@ def main():
         for i, task in enumerate(test_tasks, 1):
             print(f"\n[{i}/{total_tasks}] {task.task_id}")
             print(f"  Category: {task.category}")
-            print(f"  Running {REPETITIONS_PER_PROMPT} repetitions with iterative refinement...")
+            
+            # Determine evaluation settings for this task
+            eval_settings = get_eval_settings_for_task(task, config)
+            tier = eval_settings["tier"]
+            max_iterations = eval_settings["max_iterations"]
+            enable_waveform = eval_settings["enable_waveform"]
+            enable_formal = eval_settings["enable_formal"]
+            
+            print(
+                f"  Running {REPETITIONS_PER_PROMPT} repetitions "
+                f"(tier={tier}, max_iters={max_iterations}, "
+                f"waveform={'on' if enable_waveform else 'off'}, "
+                f"formal={'on' if enable_formal else 'off'})"
+            )
             
             # Get module name for post-processing
             module_name = extract_module_name(task.task_id)
@@ -216,7 +320,7 @@ def main():
                         confidence_tracker=confidence_tracker,
                         feedback_generator=feedback_generator,
                         waveform_analyzer=waveform_analyzer,
-                        formal_verifier=formal_verifier
+                        formal_verifier=formal_verifier,
                     )
                     
                     # Run iterative evaluation
@@ -233,7 +337,11 @@ def main():
                         task=task,
                         model=model,
                         output_dir=rep_dir,
-                        post_process_func=post_process
+                        post_process_func=post_process,
+                        max_iterations=max_iterations,
+                        enable_waveform=enable_waveform,
+                        enable_formal=enable_formal,
+                        tier=tier,
                     )
                     
                     # Save iteration history
@@ -268,7 +376,8 @@ def main():
                         'confidence_log_prob': best_metrics.confidence_log_prob,
                         'waveform_diff_summary': best_metrics.waveform_diff_summary,
                         'formal_equiv_status': best_metrics.formal_equiv_status,
-                        'semantic_repair_applied': best_metrics.semantic_repair_applied
+                        'semantic_repair_applied': best_metrics.semantic_repair_applied,
+                        'fast_skip_reason': best_metrics.fast_skip_reason,
                     }
                     task_runs.append(run_result)
                     all_results.append(run_result)
