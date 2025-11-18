@@ -23,6 +23,7 @@ credentials/
 *_backup.docx
 *_old.docx
 *_draft.docx
+Research_Paper/
 
 # Keep main paper, ignore all others
 !Benchmarking*.docx
