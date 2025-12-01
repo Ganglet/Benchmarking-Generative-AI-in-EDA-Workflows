@@ -6,6 +6,8 @@ A comprehensive benchmarking framework for evaluating open-source generative AI 
 
 This project establishes the first structured, reproducible benchmark for AI-assisted hardware design at the RTL (Register Transfer Level). It evaluates models across:
 
+- **Final dataset scope**: 50 curated Verilog design and verification tasks spanning 23 combinational, 14 sequential, 8 FSM, and 5 mixed/complex designs.
+
 - **Circuit (HDL) generation** from textual specifications
 - **Testbench generation** for functional verification
 - **Quantitative benchmarking** against reference implementations
@@ -76,7 +78,7 @@ python dataset_loader.py
 python run_phase2.py
 ```
 
-This will evaluate all 20 tasks with 3 repetitions per model and save results to `../results/phase2_benchmark/`.
+This runs the full benchmark dataset (currently 50 tasks) with 3 repetitions per model and saves results to `../results/phase2_benchmark/`.
 
 **Alternative: Run Mini Benchmark:**
 ```bash
@@ -134,11 +136,11 @@ Paper/
 │   │   ├── 7th_Benchmark_results.md
 │   │   └── 8th_Benchmark_Results.md
 │   └── dataset/
-│       ├── tasks.json            # Task metadata (20 tasks)
-│       ├── combinational/        # Combinational circuits (9 tasks)
-│       ├── sequential/           # Sequential circuits (6 tasks)
-│       ├── fsm/                  # Finite state machines (3 tasks)
-│       └── mixed/                # Mixed designs (2 tasks)
+│       ├── tasks.json            # Task metadata (50 tasks, final scope)
+│       ├── combinational/        # Combinational circuits (23 tasks)
+│       ├── sequential/           # Sequential circuits (14 tasks)
+│       ├── fsm/                  # Finite state machines (8 tasks)
+│       └── mixed/                # Mixed designs (5 tasks)
 ├── results/                      # Generated outputs
 │   ├── Benchmark_6_Results/      # Phase 2 with sequential normalization
 │   ├── Benchmark_7_Results/      # Phase 2 full dataset expansion
@@ -321,6 +323,23 @@ This section documents all 9 benchmark tests, which files were used, and their k
 
 ---
 
+### Benchmark 10: Final 50-Task Dataset Validation
+**Runner**: `run_phase4.py`  
+**Methodology**: Phase 4 - Semantic-aware iterative refinement with expanded dataset  
+**Tasks**: 50 tasks (23 combinational, 14 sequential, 8 FSM, 5 mixed)  
+**Models**: Llama-3-8B, StarCoder2-7B, TinyLlama-1.1B  
+**Repetitions**: 3 per task (450 total generations)  
+**Key Features**:
+- Validates scalability of the Phase 4 pipeline on the full 50-task scope
+- Semantic repair stack (waveform analysis, formal verification, AST repair) plus confidence tracking
+- Captures per-model entropy/iteration statistics for the larger dataset
+- Highlights remaining FSM and mixed-design functional correctness gaps
+
+**Results**: `results/Benchmark_10_Results/`  
+**Analysis**: `Research_Data/10th_Benchmark_Results.md`
+
+---
+
 ### File Usage Summary
 
 | File | Benchmarks Used | Purpose |
@@ -429,13 +448,12 @@ model = HuggingFaceInterface("org/model-name")
 
 ## 📊 Current Dataset
 
-- ✅ **20 benchmark tasks** (fully implemented and tested)
-  - 9 combinational circuits (gates, adders, mux, decoder)
-  - 6 sequential circuits (flip-flops, registers, counters)
-  - 3 FSM designs (sequence detector, traffic light, turnstile)
-  - 2 mixed/complex designs (priority encoder, ALU)
-- 🚧 **Expanding to 120 tasks** (in progress)
-  - Target: 40 combinational, 40 sequential, 20 FSM, 20 mixed
+- ✅ **50 benchmark tasks** (finalized scope)
+  - 23 combinational circuits (basic gates, arithmetic blocks, mux/decoder variants)
+  - 14 sequential circuits (flip-flops, shift registers, counters, Johnson/PIPO variants)
+  - 8 FSM designs (sequence detectors, controllers, traffic light)
+  - 5 mixed/complex designs (priority encoder, ALU)
+- 🛑 **Further dataset expansion intentionally paused at 50 tasks** to focus on semantic-aware refinement, evaluation quality, and documentation.
 
 ## 🛠️ Development Roadmap
 
@@ -460,10 +478,11 @@ model = HuggingFaceInterface("org/model-name")
 - **Sequential Expansion**: All models handle expanded sequential library (T flip-flop, shift register, PIPO register)
 - **Overall Improvement**: 70% syntax validity (Llama-3), 55% (StarCoder2), 65% (TinyLlama)
 
-### Phase 3: Dataset Expansion 🚧
-- [ ] Expand to 30 tasks
-- [ ] Expand to 60 tasks
-- [ ] Reach 120 tasks target
+### Phase 3: Dataset Expansion ✅ (Concluded)
+- [x] Expand to 30 tasks
+- [x] Expand to 50 tasks (final scope)
+
+*Decision*: Scope is intentionally capped at 50 curated tasks to prioritize deeper analysis, semantic-aware refinement, and documentation polish over further breadth.
 
 ### Phase 4: Advanced Features 📋
 - [ ] Fault injection for testbench evaluation
@@ -473,7 +492,7 @@ model = HuggingFaceInterface("org/model-name")
 - [ ] FSM functional correctness refinement
 
 ### Phase 5: Full Benchmark & Publication 📋
-- [ ] Run complete experiments on expanded dataset
+- [ ] Run complete experiments on final 50-task dataset
 - [ ] Generate publication-ready results
 - [ ] Write research paper
 
