@@ -7,6 +7,8 @@ services:
       dockerfile: Dockerfile
     image: eda-ai-benchmark:latest
     container_name: eda_benchmark
+    restart: unless-stopped
+    init: true
     volumes:
       # Mount local directories for easy development
       - ./Quantitative:/workspace/Quantitative
