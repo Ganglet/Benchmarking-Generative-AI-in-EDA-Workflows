@@ -43,30 +43,27 @@ This document outlines the development roadmap for the Benchmarking Generative A
 
 ---
 
-## Phase 3: Dataset Expansion 🚧
+## Phase 3: Dataset Expansion ✅ (Concluded)
 
-**Status**: In Progress
+**Status**: Completed – scope intentionally capped at 50 curated tasks
 
 - [x] Expand to 50 tasks (Benchmark 10) ✅
-- [ ] Expand to 60 tasks
-- [ ] Expand to 80 tasks
-- [ ] Reach 120 tasks target
-  - Target: 40 combinational, 40 sequential, 20 FSM, 20 mixed
+- [ ] Additional expansion (de-scoped by design)
 
 **Current Progress**:
 - ✅ 50 tasks completed (23 combinational, 14 sequential, 8 FSM, 5 mixed)
-- Performance validated with expanded dataset
-- Scalability confirmed
+- ✅ Phase 4 pipeline validated on 50-task dataset (450 total generations)
+- 🛑 Expansion beyond 50 tasks paused to focus on depth, analysis quality, and publication prep
 
 **Next Steps**:
-- Add 10 more tasks (target: 60 total)
-- Focus on FSM and mixed design variants
-- Maintain category balance
+- Package and document the final 50-task dataset for release
+- Double-down on FSM and mixed design evaluation strategies within the existing scope
+- Capture lessons learned + recommendations for future contributors
 
 **Deliverables**:
-- Expanded dataset (120 tasks)
-- Validation results
-- Updated documentation
+- Finalized 50-task dataset package + documentation
+- Benchmark 10 (final dataset) analysis
+- Guidance for future extensions (should expansion resume)
 
 ---
 
@@ -106,15 +103,15 @@ This document outlines the development roadmap for the Benchmarking Generative A
 
 **Status**: Planned
 
-- [ ] Run complete experiments on expanded dataset (120 tasks)
+- [ ] Run complete experiments on the finalized 50-task dataset
 - [ ] Generate publication-ready results
 - [ ] Write research paper
 - [ ] Prepare supplementary materials
 - [ ] Open-source release
 
 **Milestones**:
-1. Complete 120-task dataset
-2. Run full benchmark suite
+1. Publish the 50-task dataset package + accompanying documentation
+2. Run/full benchmark suite on the final dataset
 3. Statistical analysis and visualization
 4. Paper writing
 5. Submission
@@ -153,15 +150,15 @@ This document outlines the development roadmap for the Benchmarking Generative A
 
 ### High Priority
 1. ✅ Complete 50-task dataset validation (Done)
-2. Expand to 60 tasks
+2. Publish final 50-task dataset package & release notes
 3. FSM functional correctness research
 4. Error taxonomy development
 
 ### Medium Priority
 1. Coverage analysis implementation
 2. Prompt template variation study
-3. Documentation improvements
-4. Code optimization
+3. Documentation + reproducibility improvements
+4. Mixed-design logic repair experiments
 
 ### Low Priority
 1. Synthesis quality integration
@@ -173,10 +170,8 @@ This document outlines the development roadmap for the Benchmarking Generative A
 ## Success Metrics
 
 ### Dataset
-- [x] 50 tasks validated ✅
-- [ ] 60 tasks completed
-- [ ] 80 tasks completed
-- [ ] 120 tasks completed
+- [x] 50 tasks validated ✅ (final scope)
+- [ ] Additional expansion (paused indefinitely)
 
 ### Performance
 - [x] >70% syntax validity (achieved)
@@ -213,19 +208,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to the pro
 - ✅ Documentation structure
 
 ### Q1 2026
-- Dataset expansion to 60 tasks
+- Publish final 50-task dataset package
 - FSM functional correctness research
 - Error taxonomy development
 
 ### Q2 2026
-- Dataset expansion to 80 tasks
 - Coverage analysis implementation
-- Prompt engineering research
+- Prompt template variation study
+- Mixed/mixed-complex logic repair experiments
 
 ### Q3 2026
-- Dataset expansion to 120 tasks
-- Full benchmark execution
-- Paper writing
+- Full benchmark execution on final 50-task dataset
+- Draft publication + supplementary analyses
+- Community feedback loop on final dataset
 
 ### Q4 2026
 - Paper submission
