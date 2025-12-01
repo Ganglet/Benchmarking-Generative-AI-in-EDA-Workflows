@@ -4,14 +4,18 @@ FROM ubuntu:22.04
 # Prevent interactive prompts during installation
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=UTC
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_ROOT_USER_ACTION=ignore
 
 # Install system dependencies and EDA tools
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     # Build essentials
     build-essential \
     git \
     wget \
     curl \
+    ca-certificates \
     # Python
     python3.10 \
     python3-pip \
