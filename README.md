@@ -120,35 +120,68 @@ python run_mini_benchmark.py
 
 ```
 Paper/
-├── Quantitative/
+├── DATASET_LICENSE                                  # Dataset license (CC BY-NC 4.0)
+├── Docs/                                            # Extended documentation set
+│   ├── architecture.md
+│   ├── benchmark_history.md
+│   ├── dataset_description.md
+│   └── ...
+├── Quantitative/                                    # Core benchmarking stack
 │   ├── Eval_Pipeline.py          # Main evaluation pipeline
+│   ├── instruction.json          # Methodology + run configuration
 │   ├── model_interface.py        # AI model integration (Ollama/HF)
 │   ├── dataset_loader.py         # Task loading utilities
 │   ├── statistical_analysis.py   # Statistical analysis module
 │   ├── visualizations.py         # Plotting and visualization
-│   ├── run_mini_benchmark.py     # Quick test runner
+│   ├── confidence_tracker.py     # Entropy-based confidence modeling
+│   ├── feedback_generator.py     # Error feedback for refinement loops
+│   ├── iterative_evaluator.py    # Iterative evaluation driver
+│   ├── waveform_analyzer.py      # Waveform comparison + diffing
+│   ├── formal_verifier.py        # Formal equivalence checks
+│   ├── ast_repair.py             # AST-guided repair helpers
+│   ├── semantic_repair.py        # Semantic repair orchestrator
+│   ├── phase4_config.py          # Phase 4 feature toggles
+│   ├── phase5_config.py          # Phase 5 experiment settings
+│   ├── phase5_feedback.py        # Prompt templates for Phase 5
+│   ├── phase5_repair.py          # Phase 5 repair utilities
 │   ├── run_phase1.py             # Phase 1: Few-shot prompting
 │   ├── run_phase2.py             # Phase 2: Constrained prompts + post-processing
-│   ├── run_phase3.py             # Phase 3: Iterative refinement
-│   ├── Research_Data/            # Benchmark analysis reports
+│   ├── run_phase3.py             # Phase 3: Iterative refinement (legacy)
+│   ├── run_phase4.py             # Phase 4: Semantic-aware refinement
+│   ├── run_phase5.py             # Phase 5: Extended repair experiments
+│   ├── Research_Data/            # Benchmark analysis reports (1st–10th)
 │   │   ├── 1st_Benchmark_Results.md
-│   │   ├── 6th_Benchmark_Results.md
-│   │   ├── 7th_Benchmark_results.md
-│   │   └── 8th_Benchmark_Results.md
+│   │   ├── ...
+│   │   └── 10th_Benchmark_Results.md
 │   └── dataset/
 │       ├── tasks.json            # Task metadata (50 tasks, final scope)
 │       ├── combinational/        # Combinational circuits (23 tasks)
 │       ├── sequential/           # Sequential circuits (14 tasks)
 │       ├── fsm/                  # Finite state machines (8 tasks)
 │       └── mixed/                # Mixed designs (5 tasks)
-├── results/                      # Generated outputs
-│   ├── Benchmark_6_Results/      # Phase 2 with sequential normalization
-│   ├── Benchmark_7_Results/      # Phase 2 full dataset expansion
-│   └── Benchmark_8_Results/      # Enhanced Phase 2 with comprehensive examples
-├── figures/                      # Visualization outputs
-├── requirements.txt              # Python dependencies
-├── Dockerfile                    # Container definition
-└── README.md                     # This file
+├── Research_Paper/                                   # Reference papers + citations
+│   ├── CITATION.md
+│   └── *.pdf
+├── results/                                          # Generated benchmark outputs
+│   ├── Benchmark_1&2_Results/
+│   ├── Benchmark_3&4_Results/
+│   ├── Benchmark_5_Results/
+│   ├── Benchmark_6_Results/
+│   ├── Benchmark_7_Results/
+│   ├── Benchmark_8_Results/
+│   ├── Benchmark_9_Results/
+│   ├── Benchmark_10_Results/
+│   └── Benchmark_11_Results/
+├── figures/                                          # Visualization exports by benchmark
+│   ├── 1st_Benchmark_figures/
+│   ├── ...
+│   └── 10th_Benchmark_figures/
+├── docker-compose.yml                               # Containerized workflow entrypoint
+├── Dockerfile                                        # Base container definition
+├── LICENSE                                           # MIT license (code)
+├── README.md                                         # This file
+├── ROADMAP.md                                        # Development roadmap
+└── requirements.txt                                  # Python dependencies
 ```
 
 ## 📊 Benchmark Test History
