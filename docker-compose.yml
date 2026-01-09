@@ -17,6 +17,15 @@ services:
     working_dir: /workspace
     stdin_open: true
     tty: true
+    environment:
+      # Ollama connection: Use host.docker.internal on Windows/Mac, or host IP on Linux
+      # Defaults to http://host.docker.internal:11434 if not set
+      - OLLAMA_BASE_URL=${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      # Optional: Customize benchmark output directory
+      - BENCHMARK_OUTPUT_DIR=${BENCHMARK_OUTPUT_DIR:-Benchmark_9_Results}
+    # Extra hosts for Docker Desktop compatibility (Windows/Mac)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     # Uncomment if you have a GPU and want to use it
     # deploy:
     #   resources:
