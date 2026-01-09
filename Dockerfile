@@ -45,7 +45,16 @@ COPY requirements.txt /tmp/requirements.txt
 # Install Python dependencies
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-# Optional: Install Ollama (uncomment if needed)
+# Note: Ollama installation and configuration
+# ===========================================
+# Ollama should typically be installed on the HOST machine, not in the container.
+# This is recommended for GPU access and better performance.
+#
+# To connect from inside the container to Ollama on the host:
+# - Windows/Mac Docker Desktop: Set environment variable OLLAMA_BASE_URL=http://host.docker.internal:11434
+# - Linux: Use your host IP address or set OLLAMA_BASE_URL=http://<host-ip>:11434
+#
+# Alternative: Install Ollama inside container (not recommended for GPU use):
 # RUN curl -fsSL https://ollama.com/install.sh | sh
 
 # Create workspace directory
