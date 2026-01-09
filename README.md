@@ -52,6 +52,12 @@ brew install icarus-verilog verilator yosys python@3.10
 pip install -r requirements.txt
 ```
 
+**Optional Dependencies (for Phase 4 features):**
+- `pyvcd>=1.2.0` - For waveform analysis (installed by default in requirements.txt)
+- `pyverilog>=1.3.0` - For AST-based code repair (installed by default in requirements.txt)
+
+Note: These are optional. If not installed, Phase 4 will gracefully disable the corresponding features (waveform analysis, AST repair).
+
 **AI Models (Ollama):**
 ```bash
 # Install Ollama
@@ -99,13 +105,28 @@ python visualizations.py ../results/mini_benchmark/benchmark_results.json ../fig
 
 ## 🐳 Docker Setup
 
+### Prerequisites
+
+**On the Host Machine:**
+1. Install Ollama (if not already installed):
+   ```bash
+   curl -fsSL https://ollama.com/install.sh | sh
+   ollama serve  # Start Ollama service
+   ```
+2. Pull required models:
+   ```bash
+   ollama pull llama3
+   ollama pull tinyllama
+   ollama pull starcoder2:7b
+   ```
+
 ### Build and Run with Docker:
 
 ```bash
 # Build image
 docker-compose build
 
-# Run container
+# Run container (Ollama connection configured automatically)
 docker-compose up -d
 
 # Access shell
@@ -114,6 +135,26 @@ docker exec -it eda_benchmark bash
 # Inside container:
 cd /workspace/Quantitative
 python run_mini_benchmark.py
+```
+
+### Docker-Ollama Connection
+
+The Docker setup is configured to automatically connect to Ollama on the host machine:
+- **Windows/Mac Docker Desktop**: Uses `host.docker.internal:11434` (configured automatically)
+- **Linux**: May need to set `OLLAMA_BASE_URL` environment variable with your host IP
+
+**Manual Configuration:**
+If Ollama is running on a different host or port, set the environment variable:
+```bash
+# Set in docker-compose.yml or as environment variable
+export OLLAMA_BASE_URL=http://your-host-ip:11434
+docker-compose up -d
+```
+
+**Verify Connection:**
+```bash
+# Inside container
+python -c "from model_interface import OllamaInterface; OllamaInterface('llama3')"
 ```
 
 ## 📁 Project Structure
