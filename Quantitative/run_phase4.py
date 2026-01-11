@@ -5,6 +5,7 @@ Integrates intelligent post-processing with adaptive iterative evaluation loop
 """
 
 import sys
+import os
 import json
 import statistics
 from pathlib import Path
@@ -254,8 +255,9 @@ def main():
     
     print("  ✓ All components initialized")
     
-    # Setup output
-    output_dir = Path(__file__).parent.parent / "results" / "Benchmark_9_Results"
+    # Setup output (configurable via environment variable)
+    output_dir_name = os.getenv("BENCHMARK_OUTPUT_DIR", "Benchmark_9_Results")
+    output_dir = Path(__file__).parent.parent / "results" / output_dir_name
     output_dir.mkdir(parents=True, exist_ok=True)
     print(f"\n📊 Saving to: {output_dir}")
     

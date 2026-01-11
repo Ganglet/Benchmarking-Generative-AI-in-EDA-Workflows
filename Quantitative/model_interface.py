@@ -4,6 +4,7 @@ Supports Ollama (local) and HuggingFace Transformers
 """
 
 import json
+import os
 import time
 import requests
 from typing import Optional, Dict, Tuple, List
@@ -12,16 +13,23 @@ from pathlib import Path
 class OllamaInterface:
     """Interface for Ollama local models (Llama3, TinyLlama, etc.)"""
     
-    def __init__(self, model_name: str, base_url: str = "http://localhost:11434"):
+    def __init__(self, model_name: str, base_url: Optional[str] = None):
         """
         Initialize Ollama interface
         
         Args:
             model_name: Name of model (e.g., 'llama3', 'tinyllama')
-            base_url: Ollama API endpoint
+            base_url: Ollama API endpoint (defaults to OLLAMA_BASE_URL env var or http://localhost:11434)
+                     For Docker: use http://host.docker.internal:11434 (Windows/Mac) or host IP (Linux)
         """
         self.model_name = model_name
-        self.base_url = base_url
+        if base_url is None:
+            # Support environment variable for Docker compatibility
+            # Use host.docker.internal on Windows/Mac Docker Desktop
+            # On Linux, use the host's IP address or set OLLAMA_BASE_URL
+            self.base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        else:
+            self.base_url = base_url
         self._verify_connection()
     
     def _verify_connection(self):
@@ -37,6 +45,9 @@ class OllamaInterface:
         except requests.exceptions.RequestException as e:
             print(f"⚠ Cannot connect to Ollama at {self.base_url}")
             print(f"  Make sure Ollama is running: 'ollama serve'")
+            if "localhost" in self.base_url or "127.0.0.1" in self.base_url:
+                print(f"  For Docker: Set OLLAMA_BASE_URL=http://host.docker.internal:11434 (Windows/Mac)")
+                print(f"  Or use host IP address on Linux")
             print(f"  Error: {e}")
     
     def generate_hdl(
