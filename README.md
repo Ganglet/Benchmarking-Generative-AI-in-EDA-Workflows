@@ -574,28 +574,11 @@ model = HuggingFaceInterface("org/model-name")
 
 *Decision*: Scope is intentionally capped at 50 curated tasks to prioritize deeper analysis, semantic-aware refinement, and documentation polish over further breadth.
 
-### Phase 4: Advanced Features 📋
-- [ ] Fault injection for testbench evaluation
-- [ ] Prompt template variations
-- [ ] Coverage analysis
-- [ ] Error taxonomy
-- [ ] FSM functional correctness refinement
-
-### Phase 5: Full Benchmark & Publication 📋
+### Phase 4: Full Benchmark & Publication 📋
 - [ ] Run complete experiments on final 50-task dataset
 - [ ] Generate publication-ready results
 - [ ] Write research paper
 
-## 📚 Citation
-
-```bibtex
-@inproceedings{benchmark-genai-eda,
-  title={Benchmarking Generative AI in EDA Workflows},
-  author={[Your Name]},
-  year={2025},
-  note={In preparation}
-}
-```
 
 ## 🤝 Contributing
 
