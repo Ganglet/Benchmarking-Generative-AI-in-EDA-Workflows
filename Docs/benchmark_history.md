@@ -211,6 +211,28 @@ This document documents all 10 benchmark tests, which files were used, and their
 
 ---
 
+## Benchmark 12: Phase 5 Multi-Model, Quality-Focused Run
+
+**Runner**: `run_phase5.py`  
+**Methodology**: Phase 5 in strict mode (waveform + formal verification enabled, semantic + AST repair, confidence tracking)  
+**Tasks**: 50 tasks (full dataset)  
+**Models**: Llama-3-8B, StarCoder2-7B, TinyLlama-1.1B  
+**Repetitions**: 3 per task (450 runs)  
+
+**Key Features**:
+- Strict mode: disables entropy-based skips, runs full waveform/formal checks where applicable.
+- MAX_ITERATIONS=6 with a lower improvement threshold (0.05) to allow extra refinement.
+- Higher iteration caps for sequential/mixed/FSM tasks; extended per-task runtime (90s).
+- Semantic repair stack retained (waveform analysis, AST repair, formal verification).
+
+**Goal vs Benchmark 10**:
+- Improve primary metric (simulation pass rate) relative to Benchmark 10 while holding or improving syntax validity.
+
+**Results**: `results/Benchmark_12_Results/`  
+**Analysis**: `Quantitative/Research_Data/12th_Benchmark_Results.md`
+
+---
+
 ## Summary Statistics Across All Benchmarks
 
 | Benchmark | Tasks | Models | Repetitions | Total Runs | Key Innovation |
