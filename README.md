@@ -22,17 +22,27 @@ This project establishes the first structured, reproducible benchmark for AI-ass
 
 ## 📊 Evaluation Metrics
 
-### Primary Metrics
-- **Syntax Validity (SV)**: % of files that compile without errors
-- **Functional Correctness (FC)**: % producing expected simulation outputs
-- **Synthesis Quality (SQ)**: Cell count and logic depth
-- **Testbench Detection Rate (TDR)**: Fault detection capability
-- **Generation Time (GT)**: Average inference time
+### Metrics Computed in Every Benchmark Run
+- **Syntax Validity (SV)**: % of files that compile without errors (Verilator + iverilog)
+- **Functional Correctness (FC)**: % producing expected simulation outputs (iverilog + testbench)
+- **Generation Time (GT)**: Average inference time per task
+- **Compile Time**: Verilator/iverilog compilation time
+- **Simulation Time**: iverilog/vvp simulation time
 
-### Secondary Metrics
-- **Prompt Sensitivity (PS)**: Variance across prompt templates
-- **Hallucination Index (HI)**: Invalid construct frequency
-- **Usability Score (US)**: Composite quality metric
+### Additional Metrics Computed in Phase 4+ Runs (Benchmarks 9, 10, 12)
+- **Iteration Count**: Number of generation–evaluation cycles per task
+- **Confidence Entropy**: Token-level entropy as a model confidence proxy
+- **Waveform Diff Summary**: Signal-level mismatch between generated and reference waveform (when enabled)
+- **Formal Equivalence Status**: Result of formal equivalence check (when enabled)
+- **Semantic Repair Applied**: List of repair operations applied during iterative refinement
+
+### Metrics Defined but NOT Computed
+The following were originally planned but have **not been implemented** in any benchmark run:
+- **Synthesis Quality (SQ)**: Gate count / area via Yosys — `SynthesisTool` class exists in code but is never invoked; all results have `gate_count=None`, `cell_count=None`
+- **Testbench Detection Rate (TDR)**: Fault injection coverage — no fault injector built; `fault_detection_ratio` is always `None`
+- **Prompt Sensitivity (PS)**: Variance across prompt templates A/B/C — each phase uses a single fixed prompt style; cross-template comparison not run
+- **Hallucination Index (HI)**: Undeclared signal count — no code exists to detect these
+- **Usability Score (US)**: Composite formula `0.4*FC + 0.3*SV + 0.2*(1−area) + 0.1*TDR` — never evaluated (depends on SQ and TDR)
 
 ## 🚀 Quick Start
 
@@ -437,15 +447,19 @@ This section documents all 9 benchmark tests, which files were used, and their k
 | `run_phase1.py` | 1 | Phase 1: Few-shot prompting baseline |
 | `run_phase2.py` | 2-8 | Phase 2: Constrained prompts + post-processing (evolved across benchmarks) |
 | `run_phase3.py` | None | Phase 3: Iterative refinement (not used in final benchmarks) |
-| `run_phase4.py` | 9 | Phase 4: Semantic-aware iterative refinement |
-| `waveform_analyzer.py` | 9 | Waveform analysis for semantic repair |
-| `formal_verifier.py` | 9 | Formal verification for semantic repair |
-| `ast_repair.py` | 9 | AST-based code repair |
-| `semantic_repair.py` | 9 | Semantic repair orchestrator |
-| `iterative_evaluator.py` | 9 | Adaptive iterative evaluation loop |
-| `feedback_generator.py` | 9 | Error feedback generation |
-| `confidence_tracker.py` | 9 | Confidence modeling and entropy tracking |
-| `phase4_config.py` | 9 | Phase 4 configuration |
+| `run_phase4.py` | 9, 10 | Phase 4: Semantic-aware iterative refinement |
+| `run_phase5.py` | 12 | Phase 5: Enhanced FSM/mixed prompts + micro-repair |
+| `waveform_analyzer.py` | 9, 10, 12 | Waveform analysis for semantic repair |
+| `formal_verifier.py` | 9, 10, 12 | Formal verification for semantic repair |
+| `ast_repair.py` | 9, 10, 12 | AST-based code repair |
+| `semantic_repair.py` | 9, 10, 12 | Semantic repair orchestrator |
+| `iterative_evaluator.py` | 9, 10, 12 | Adaptive iterative evaluation loop |
+| `feedback_generator.py` | 9, 10 | Error feedback generation |
+| `confidence_tracker.py` | 9, 10, 12 | Confidence modeling and entropy tracking |
+| `phase4_config.py` | 9, 10 | Phase 4 configuration |
+| `phase5_config.py` | 12 | Phase 5 configuration |
+| `phase5_feedback.py` | 12 | Category-aware feedback templates for Phase 5 |
+| `phase5_repair.py` | 12 | Phase 5 micro-repair engine |
 
 ---
 
@@ -459,12 +473,17 @@ This section documents all 9 benchmark tests, which files were used, and their k
 - 2 models → 3 models (added StarCoder2)
 - Basic fixes → Sequential normalization + FSM/mixed templates
 
-**Phase 2 → Phase 4 (Benchmark 9)**:
+**Phase 2 → Phase 4 (Benchmarks 9–10)**:
 - Single-pass generation → Iterative refinement with feedback
 - Syntax-only validation → Semantic validation (waveform, formal verification)
 - Static post-processing → Adaptive AST-based repair
 - No confidence tracking → Confidence modeling with entropy
 - Fixed methodology → Adaptive stopping based on confidence
+
+**Phase 4 → Phase 5 (Benchmark 12)**:
+- Standard constrained prompts → Enhanced FSM/mixed-specific prompts with reference templates
+- Standard post-processing → Micro-repair engine runs before standard post-processing
+- Generic feedback → Category-aware feedback targeting FSM and mixed design failure modes
 
 ## 📖 Usage Examples
 
