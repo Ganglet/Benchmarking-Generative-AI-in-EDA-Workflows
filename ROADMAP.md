@@ -72,20 +72,21 @@ This document outlines the development roadmap for the Benchmarking Generative A
 **Status**: Partially Completed (Semantic-Aware Iterative Refinement ✅)
 
 ### Completed ✅
-- [x] Semantic-aware iterative refinement (Benchmark 9-10)
+- [x] Semantic-aware iterative refinement (Benchmarks 9–10)
 - [x] Waveform analysis
-- [x] Formal verification (optional)
+- [x] Formal verification (optional, enabled for FSM in Phase 5)
 - [x] AST-based code repair
 - [x] Confidence tracking
 - [x] Adaptive stopping
 - [x] Task tiering for efficiency
+- [x] Phase 5: Enhanced FSM/mixed prompts with reference templates + micro-repair (Benchmark 12)
 
 ### Planned 📋
-- [ ] Fault injection for testbench evaluation
-- [ ] Prompt template variations
+- [ ] Fault injection for testbench evaluation (not yet implemented; `fault_detection_ratio` always `None`)
+- [ ] Prompt template variation study (templates A/B/C defined but cross-template comparison not run)
 - [ ] Coverage analysis
 - [ ] Error taxonomy
-- [ ] FSM functional correctness refinement
+- [ ] FSM functional correctness improvement
 
 **Priority Items**:
 1. **FSM Functional Correctness**: Current bottleneck (0% simulation despite syntax validity)
@@ -180,7 +181,7 @@ This document outlines the development roadmap for the Benchmarking Generative A
 - [ ] >70% mixed design functional correctness
 
 ### Research
-- [x] 10 benchmarks completed ✅
+- [x] 11 benchmarks completed (Benchmarks 1–10 + 12) ✅
 - [ ] Research paper submitted
 - [ ] Open-source release
 - [ ] Community adoption
@@ -203,9 +204,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to the pro
 ## Timeline
 
 ### Q4 2025
-- ✅ Phase 4 implementation (Benchmark 9)
+- ✅ Phase 4 implementation (Benchmarks 9–10)
 - ✅ 50-task dataset expansion (Benchmark 10)
 - ✅ Documentation structure
+- ✅ Phase 5 implementation: enhanced FSM/mixed prompts + micro-repair (Benchmark 12)
 
 ### Q1 2026
 - Publish final 50-task dataset package
