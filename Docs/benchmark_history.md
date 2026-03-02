@@ -1,6 +1,6 @@
 # Benchmark Test History
 
-This document documents all 10 benchmark tests, which files were used, and their key features.
+This document documents all 11 benchmark tests (Benchmarks 1–10 and Benchmark 12; Benchmark 11 was a data-collection run not formally documented here), which files were used, and their key features.
 
 ## Core Files (Used in All Benchmarks)
 
@@ -247,6 +247,7 @@ This document documents all 10 benchmark tests, which files were used, and their
 | 8 | 20 | 3 | 3 | 180 | Comprehensive examples |
 | 9 | 20 | 3 | 3 | 180 | Semantic-aware refinement |
 | 10 | 50 | 3 | 3 | 450 | Expanded dataset validation |
+| 12 | 50 | 3 | 3 | 450 | Phase 5 enhanced FSM/mixed prompts + micro-repair |
 
-**Total**: 1,160 benchmark runs across all experiments
+**Total**: 1,610 benchmark runs across all experiments (Benchmarks 1–10 + 12)
 

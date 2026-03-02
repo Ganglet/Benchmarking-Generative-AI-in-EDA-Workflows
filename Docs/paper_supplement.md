@@ -213,31 +213,28 @@ We selected models across three size tiers to evaluate:
    - May need minimum line constraints
 
 4. **Scalability**:
-   - Large-scale evaluation (120 tasks) not yet completed
-   - Performance optimizations needed
-   - Resource requirements for full benchmark
+   - Dataset scope is intentionally finalized at 50 tasks; expansion beyond this is paused
+   - FSM and mixed-design functional correctness remain primary open problems at the 50-task scale
 
 ### Future Work Directions
 
-1. **Dataset Expansion**:
-   - Reach 120-task target
-   - Add more complex designs
-   - Include more FSM variants
+1. **FSM and Mixed Design Correctness**:
+   - FSM functional correctness (currently 0% simulation despite syntax validity in many runs) is the primary open problem
+   - Mixed-design ALU operation logic needs further improvement
 
-2. **Advanced Features**:
-   - Fault injection for testbench evaluation
-   - Coverage analysis
-   - Error taxonomy development
+2. **Advanced Evaluation Features** (not currently implemented):
+   - Fault injection for testbench effectiveness evaluation
+   - Code coverage analysis
+   - Error taxonomy development (systematic classification of failure types)
 
 3. **Model Improvements**:
    - Fine-tuning on HDL corpus
    - Prompt engineering research
    - Multi-model ensemble approaches
 
-4. **Tool Integration**:
-   - Synthesis quality metrics
-   - Timing analysis
-   - Power estimation
+4. **Synthesis Quality Integration** (not currently implemented):
+   - Yosys-based gate count and area estimation
+   - Timing analysis integration
 
 ## Ablation Studies
 

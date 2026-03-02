@@ -9,7 +9,8 @@ The Benchmarking Generative AI in EDA Workflows framework is designed as a modul
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    User Interface Layer                      │
-│  (run_phase1.py, run_phase2.py, run_phase4.py)              │
+│  (run_phase1.py, run_phase2.py, run_phase4.py,              │
+│   run_phase5.py)                                            │
 └──────────────────────┬──────────────────────────────────────┘
                        │
 ┌──────────────────────▼──────────────────────────────────────┐
@@ -24,9 +25,11 @@ The Benchmarking Generative AI in EDA Workflows framework is designed as a modul
 │ Model Layer  │ │ Dataset    │ │ EDA Tools     │
 │              │ │ Layer      │ │ Layer         │
 │ Ollama/HF    │ │ tasks.json │ │ Verilator/    │
-│ Interfaces   │ │ Loader     │ │ Icarus/Yosys  │
+│ Interfaces   │ │ Loader     │ │ Icarus Verilog│
 └──────────────┘ └────────────┘ └───────────────┘
 ```
+
+> **Note on Yosys / SynthesisTool**: A `SynthesisTool` class (wrapping Yosys) exists in `Eval_Pipeline.py` and is instantiated by `BenchmarkPipeline`. However, none of the actual phase runners (`run_phase1.py` through `run_phase5.py`) call `pipeline.evaluate_task()` — they all construct `EvaluationMetrics` manually with synthesis fields set to `None`. Yosys is therefore **never invoked** in any benchmark run. Synthesis metrics (`gate_count`, `cell_count`, `estimated_area`) are always `None` in all results.
 
 ## Component Architecture
 
@@ -246,8 +249,9 @@ Initial Generation → Evaluation → Feedback → Regeneration → ...
 ## Configuration Management
 
 ### Global Configuration
-- `instruction.json`: Research methodology, model specifications, dataset info
+- `instruction.json`: Research methodology, model specifications, dataset info, and a clear record of which metrics are implemented vs. not implemented
 - `phase4_config.py`: Phase 4 feature flags and optimization settings
+- `phase5_config.py`: Phase 5 feature flags (used in Benchmark 12)
 
 ### Runtime Configuration
 - Task-specific settings (tiers, max iterations)

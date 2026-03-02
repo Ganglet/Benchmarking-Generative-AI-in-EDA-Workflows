@@ -6,9 +6,9 @@ This document describes the benchmark dataset used for evaluating generative AI 
 
 The dataset consists of standardized digital circuit specifications with corresponding verified HDL implementations and testbenches. Each task includes a natural language specification, reference Verilog module, and self-checking testbench.
 
-## Current Dataset Status
+## Dataset Status
 
-### Total Tasks: 50
+### Total Tasks: 50 (Finalized Scope)
 
 **Distribution**:
 - **Combinational**: 23 tasks (46%)
@@ -16,13 +16,7 @@ The dataset consists of standardized digital circuit specifications with corresp
 - **FSM**: 8 tasks (16%)
 - **Mixed/Complex**: 5 tasks (10%)
 
-### Target Dataset: 120 Tasks
-
-**Planned Distribution**:
-- **Combinational**: 40 tasks (33%)
-- **Sequential**: 40 tasks (33%)
-- **FSM**: 20 tasks (17%)
-- **Mixed/Complex**: 20 tasks (17%)
+> **Note on scope**: The dataset is intentionally capped at 50 curated tasks. Earlier planning documents referenced a 120-task target; that expansion has been de-scoped in favour of deeper analysis, semantic-aware refinement, and publication preparation. See [ROADMAP.md](../ROADMAP.md) for current status.
 
 ## Task Categories
 
@@ -297,28 +291,17 @@ This will:
 - Allows testing specification variation sensitivity
 - Same reference implementation, different natural language descriptions
 
-## Dataset Expansion Plan
+## Dataset Scope (Finalized)
 
-### Phase 1: Current (50 tasks) ✅
+The dataset is finalized at 50 tasks. Expansion beyond this count is intentionally paused.
+
+### Current Distribution (50 tasks) ✅
 - 23 combinational
 - 14 sequential
 - 8 FSM
 - 5 mixed
 
-### Phase 2: Target 60 tasks
-- Add 10 more tasks
-- Focus on FSM and mixed variants
-- Maintain category balance
-
-### Phase 3: Target 80 tasks
-- Add 20 more tasks
-- Expand combinational and sequential
-- Add more FSM variants
-
-### Phase 4: Target 120 tasks
-- Add 40 more tasks
-- Reach target distribution (40/40/20/20)
-- Comprehensive coverage
+**Decision rationale**: Scope capped at 50 curated tasks to prioritize semantic-aware refinement quality, deeper per-task analysis, and publication readiness over breadth. If expansion resumes, see [extending.md](extending.md) for how to add new tasks.
 
 ## Quality Assurance
 

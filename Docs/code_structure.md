@@ -12,13 +12,14 @@ Quantitative/
 │   └── dataset_loader.py         # Task loading and validation
 │
 ├── Phase Runners
-│   ├── run_phase1.py             # Phase 1: Few-shot prompting
-│   ├── run_phase2.py             # Phase 2: Constrained prompts + post-processing
-│   ├── run_phase3.py             # Phase 3: Iterative refinement (unused)
-│   └── run_phase4.py             # Phase 4: Semantic-aware iterative refinement
+│   ├── run_phase1.py             # Phase 1: Few-shot prompting (Benchmark 1)
+│   ├── run_phase2.py             # Phase 2: Constrained prompts + post-processing (Benchmarks 2-8)
+│   ├── run_phase3.py             # Phase 3: Iterative refinement (unused — superseded by Phase 4)
+│   ├── run_phase4.py             # Phase 4: Semantic-aware iterative refinement (Benchmarks 9-10)
+│   └── run_phase5.py             # Phase 5: Enhanced FSM/mixed prompts + micro-repair (Benchmark 12)
 │
-├── Phase 4 Components
-│   ├── phase4_config.py          # Phase 4 configuration
+├── Phase 4 Components (Benchmarks 9-10)
+│   ├── phase4_config.py          # Phase 4 configuration and feature flags
 │   ├── iterative_evaluator.py   # Iterative refinement loop
 │   ├── feedback_generator.py     # Error feedback generation
 │   ├── confidence_tracker.py    # Confidence modeling
@@ -27,12 +28,17 @@ Quantitative/
 │   ├── formal_verifier.py       # Formal verification
 │   └── ast_repair.py            # AST-based code repair
 │
+├── Phase 5 Components (Benchmark 12)
+│   ├── phase5_config.py          # Phase 5 configuration and feature flags
+│   ├── phase5_feedback.py        # Category-aware feedback templates
+│   └── phase5_repair.py          # Micro-repair engine (runs before standard post-processing)
+│
 ├── Analysis Tools
 │   ├── statistical_analysis.py  # Statistical analysis
 │   └── visualizations.py        # Plotting and visualization
 │
 ├── Configuration
-│   └── instruction.json         # Research methodology config
+│   └── instruction.json         # Research methodology config (implemented vs. not-implemented metrics)
 │
 └── Dataset
     └── dataset/                 # Task specifications and references
@@ -65,27 +71,41 @@ class BenchmarkTask:
 ```python
 @dataclass
 class EvaluationMetrics:
-    # Syntax validity
+    # Syntax validity — COMPUTED in all phases
     syntax_valid: bool
     compile_errors: List[str]
-    
-    # Functional correctness
+
+    # Functional correctness — COMPUTED in all phases
     simulation_passed: bool
     test_cases_passed: int
     test_cases_total: int
-    
-    # Timing metrics
+
+    # Synthesis quality — FIELDS EXIST but always None in all phase runners
+    # (SynthesisTool class exists in Eval_Pipeline.py but is never called
+    #  by run_phase1 through run_phase5; all phases set these to None manually)
+    gate_count: Optional[int]        # Always None
+    cell_count: Optional[int]        # Always None
+    estimated_area: Optional[float]  # Always None
+
+    # Timing metrics — COMPUTED in all phases
     generation_time: float
     compile_time: float
     simulation_time: float
-    
-    # Phase 4 extensions
+
+    # Testbench coverage — FIELDS EXIST but never computed
+    tb_generated: bool               # Always False
+    fault_detection_ratio: Optional[float]  # Always None
+
+    # Phase 4 extensions — COMPUTED in Phase 4+ runs (Benchmarks 9, 10, 12)
     iteration_count: int
     confidence_entropy: Optional[float]
+    waveform_diff_summary: Optional[str]
+    formal_equiv_status: Optional[str]
     semantic_repair_applied: List[str]
+    fast_skip_reason: Optional[str]
 ```
-- Comprehensive metrics storage
-- Extensible for new evaluation criteria
+- Metrics storage for all benchmark phases
+- Several fields (`gate_count`, `cell_count`, `estimated_area`, `tb_generated`, `fault_detection_ratio`) exist in the dataclass but are **never populated** — all phase runners hard-code them to `None`/`False`
 
 #### `HDLCompiler`
 ```python

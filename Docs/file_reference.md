@@ -6,10 +6,10 @@ This document provides a comprehensive reference of all files in the codebase, w
 
 | File | Purpose | Benchmarks |
 |------|---------|------------|
-| `Eval_Pipeline.py` | Main evaluation pipeline (compilation, simulation, metrics) | All (1-10) |
-| `model_interface.py` | AI model integration (Ollama/HuggingFace interfaces) | All (1-10) |
-| `dataset_loader.py` | Task loading and validation utilities | All (1-10) |
-| `instruction.json` | Configuration and methodology specifications | All (1-10) |
+| `Eval_Pipeline.py` | Main evaluation pipeline (compilation, simulation, metrics) | All (1-10, 12) |
+| `model_interface.py` | AI model integration (Ollama/HuggingFace interfaces) | All (1-10, 12) |
+| `dataset_loader.py` | Task loading and validation utilities | All (1-10, 12) |
+| `instruction.json` | Configuration and methodology specifications | All (1-10, 12) |
 
 ## Phase Runners
 
@@ -18,20 +18,29 @@ This document provides a comprehensive reference of all files in the codebase, w
 | `run_phase1.py` | 1 | Phase 1: Few-shot prompting baseline |
 | `run_phase2.py` | 2-8 | Phase 2: Constrained prompts + post-processing (evolved across benchmarks) |
 | `run_phase3.py` | None | Phase 3: Iterative refinement (not used in final benchmarks) |
-| `run_phase4.py` | 9-10 | Phase 4: Semantic-aware iterative refinement |
+| `run_phase4.py` | 9, 10 | Phase 4: Semantic-aware iterative refinement |
+| `run_phase5.py` | 12 | Phase 5: Enhanced FSM/mixed prompts + micro-repair |
 
 ## Phase 4 Components (Benchmarks 9-10)
 
 | File | Benchmarks Used | Purpose |
 |------|----------------|---------|
-| `phase4_config.py` | 9-10 | Phase 4 configuration and feature flags |
-| `iterative_evaluator.py` | 9-10 | Adaptive iterative refinement loop |
-| `feedback_generator.py` | 9-10 | Error feedback generation |
-| `confidence_tracker.py` | 9-10 | Confidence modeling and entropy tracking |
-| `semantic_repair.py` | 9-10 | Semantic repair orchestrator |
-| `waveform_analyzer.py` | 9-10 | Waveform difference analysis |
-| `formal_verifier.py` | 9-10 | Formal equivalence checking |
-| `ast_repair.py` | 9-10 | AST-based code repair |
+| `phase4_config.py` | 9, 10 | Phase 4 configuration and feature flags |
+| `iterative_evaluator.py` | 9, 10, 12 | Adaptive iterative refinement loop |
+| `feedback_generator.py` | 9, 10 | Error feedback generation |
+| `confidence_tracker.py` | 9, 10, 12 | Confidence modeling and entropy tracking |
+| `semantic_repair.py` | 9, 10, 12 | Semantic repair orchestrator |
+| `waveform_analyzer.py` | 9, 10, 12 | Waveform difference analysis |
+| `formal_verifier.py` | 9, 10, 12 | Formal equivalence checking |
+| `ast_repair.py` | 9, 10, 12 | AST-based code repair |
+
+## Phase 5 Components (Benchmark 12)
+
+| File | Benchmarks Used | Purpose |
+|------|----------------|---------|
+| `phase5_config.py` | 12 | Phase 5 configuration and feature flags |
+| `phase5_feedback.py` | 12 | Category-aware feedback templates for FSM and mixed tasks |
+| `phase5_repair.py` | 12 | Micro-repair engine (runs before standard post-processing) |
 
 ## Analysis Tools (Post-Processing)
 
@@ -108,6 +117,28 @@ run_phase4.py
     └── post_process_verilog()
 ```
 
+### Phase 5 Dependencies
+```
+run_phase5.py
+├── Eval_Pipeline.py
+├── model_interface.py
+├── dataset_loader.py
+├── phase5_config.py
+├── phase5_feedback.py
+├── phase5_repair.py
+├── iterative_evaluator.py
+├── confidence_tracker.py
+├── semantic_repair.py
+│   ├── waveform_analyzer.py
+│   ├── formal_verifier.py
+│   └── ast_repair.py
+└── run_phase2.py (for post-processing functions)
+    ├── extract_module_name()
+    ├── get_port_spec()
+    ├── get_constrained_prompt()
+    └── post_process_verilog()
+```
+
 ## File Evolution
 
 ### Phase 1 → Phase 2
@@ -119,6 +150,11 @@ run_phase4.py
 - **Added**: All Phase 4 components (iterative evaluator, semantic repair, etc.)
 - **Added**: Configuration file (`phase4_config.py`)
 - **Enhanced**: Post-processing with semantic repair integration
+
+### Phase 4 → Phase 5
+- **Added**: `run_phase5.py` with enhanced FSM/mixed-specific prompts and micro-repair
+- **Added**: `phase5_config.py`, `phase5_feedback.py`, `phase5_repair.py`
+- **Enhanced**: Category-aware feedback and micro-repair runs before standard post-processing
 
 ## Import Patterns
 
