@@ -1,10 +1,9 @@
 {
     "project_title": "Benchmarking Generative AI in EDA Workflows",
     "research_scope": {
-      "objective": "Evaluate the capability and reliability of open-source generative models to automatically generate synthesizable Verilog HDL and functional testbenches for standard digital circuit design tasks.",
+      "objective": "Evaluate the capability and reliability of open-source generative models to automatically generate synthesizable Verilog HDL for standard digital circuit design tasks.",
       "subtasks": [
         "Circuit (HDL) generation from textual specification",
-        "Testbench generation for functional verification",
         "Quantitative benchmarking against reference implementations"
       ],
       "boundaries": {
@@ -40,11 +39,11 @@
     "dataset": {
       "description": "Task library of standardized digital circuit specifications and corresponding verified HDL + testbenches.",
       "sources": ["OpenCores", "HDLBits", "Custom generated specs"],
-      "target_size": 120,
+      "final_size": 50,
       "composition": {
         "combinational": ["adders", "comparators", "multiplexers", "encoders", "decoders"],
-        "sequential": ["counters", "shift_registers", "lfsr"],
-        "fsm": ["sequence_detectors", "traffic_light_controller"],
+        "sequential": ["counters", "shift_registers", "flip_flops"],
+        "fsm": ["sequence_detectors", "traffic_light_controller", "turnstile_controller"],
         "mixed": ["small_ALU", "priority_encoder"]
       },
       "data_format": {
@@ -69,18 +68,23 @@
     "prompt_templates": [
       {
         "template_id": "A",
-        "description": "Minimal natural-language specification",
-        "example_prompt": "Design a 4-bit ripple carry adder in Verilog."
+        "description": "Minimal natural-language specification (used in Phase 1)",
+        "example_prompt": "Design a 4-bit ripple carry adder in Verilog.",
+        "status": "implemented"
       },
       {
         "template_id": "B",
-        "description": "Specification + I/O interface definition",
-        "example_prompt": "Write synthesizable Verilog for a 4-bit synchronous up-counter with enable and reset. Module interface: input clk, reset, en; output reg [3:0] count."
+        "description": "Specification + I/O interface definition (used in Phase 2+)",
+        "example_prompt": "Write synthesizable Verilog for a 4-bit synchronous up-counter with enable and reset. Module interface: input clk, reset, en; output reg [3:0] count.",
+        "status": "implemented",
+        "note": "Each phase runner uses a single fixed prompt style. Cross-template sensitivity comparison (A vs B vs C) has not been implemented."
       },
       {
         "template_id": "C",
-        "description": "Specification + sample I/O examples",
-        "example_prompt": "Design a 4-bit binary to gray code converter. Input-output examples: 0000→0000, 0001→0001, 0010→0011, 0011→0010. Write synthesizable Verilog."
+        "description": "Specification + sample I/O examples (not yet used in any benchmark run)",
+        "example_prompt": "Design a 4-bit binary to gray code converter. Input-output examples: 0000→0000, 0001→0001, 0010→0011, 0011→0010. Write synthesizable Verilog.",
+        "status": "not_implemented",
+        "note": "Template C is defined here for reference. No benchmark run has used or compared this template."
       }
     ],
     "benchmark_pipeline": {
@@ -89,11 +93,10 @@
           "name": "Model Inference",
           "actions": [
             "Feed each specification prompt to all three models.",
-            "Collect HDL/testbench outputs with metadata (model name, seed, runtime)."
+            "Collect HDL outputs with metadata (model name, seed, runtime)."
           ],
           "parameters": {
-            "temperature": [0.0, 0.3],
-            "max_new_tokens": 512,
+            "temperature": 0.0,
             "repetitions_per_prompt": 3
           }
         },
@@ -104,113 +107,154 @@
             "verilator --lint-only <file.v>",
             "iverilog -t null -o /dev/null <file.v>"
           ],
-          "output_metrics": ["syntax_ok", "error_log"]
+          "output_metrics": ["syntax_valid", "compile_errors"],
+          "status": "implemented"
         },
         {
           "name": "Functional Simulation",
-          "tools": ["Icarus Verilog", "Verilator"],
+          "tools": ["Icarus Verilog"],
           "procedure": [
-            "If model generated DUT only, pair with reference testbench.",
-            "If model generated TB only, pair with reference DUT.",
-            "Simulate and verify output correctness via waveform or log comparison."
+            "Pair generated DUT with reference testbench.",
+            "Compile with iverilog and run with vvp.",
+            "Parse PASS/FAIL output from testbench stdout."
           ],
-          "output_metrics": ["functional_correctness", "simulation_log"]
-        },
-        {
-          "name": "Synthesis Analysis",
-          "tools": ["Yosys"],
-          "commands": [
-            "yosys -p 'read_verilog <file.v>; synth; stat;'"
-          ],
-          "output_metrics": ["cell_count", "logic_depth", "area_proxy"]
-        },
-        {
-          "name": "Testbench Effectiveness",
-          "tools": ["Custom Python fault injector"],
-          "procedure": [
-            "Inject single-bit or stuck-at faults into DUT.",
-            "Run generated testbench and observe if assertion or mismatch occurs."
-          ],
-          "output_metrics": ["fault_detection_ratio", "coverage_estimate"]
+          "output_metrics": ["simulation_passed", "test_cases_passed", "test_cases_total"],
+          "status": "implemented"
         },
         {
           "name": "Results Aggregation",
-          "output_format": "CSV",
+          "output_format": "JSON",
           "fields": [
-            "task_id", "model", "prompt_type", "syntax_ok", "functional_ok",
-            "cell_count", "tdr", "generation_time", "hallucination_count"
-          ]
+            "task_id", "model", "syntax_valid", "simulation_passed",
+            "test_cases_passed", "test_cases_total",
+            "generation_time", "compile_time", "simulation_time",
+            "iteration_count", "confidence_entropy",
+            "waveform_diff_summary", "formal_equiv_status", "semantic_repair_applied"
+          ],
+          "status": "implemented"
         }
-      ]
+      ],
+      "pipeline_stages_not_implemented": {
+        "note": "The following pipeline stages are defined here as design goals but have NOT been built in any benchmark run.",
+        "synthesis_analysis": {
+          "description": "Yosys-based logic synthesis to extract cell count, logic depth, and area proxy.",
+          "tools": ["Yosys"],
+          "reason_not_implemented": "The SynthesisTool class exists in Eval_Pipeline.py but is never called by any phase runner (run_phase1 through run_phase5). All phase runners construct EvaluationMetrics manually with gate_count=None, cell_count=None, estimated_area=None."
+        },
+        "testbench_effectiveness": {
+          "description": "Fault injection pipeline to measure testbench detection rate.",
+          "reason_not_implemented": "No fault injector has been built. fault_detection_ratio is always None in all benchmark results."
+        }
+      }
     },
     "metrics": {
-      "primary": [
+      "implemented": [
         {
           "name": "Syntax Validity",
           "symbol": "SV",
-          "definition": "Percentage of Verilog files that compile without syntax errors."
+          "definition": "Percentage of Verilog files that compile without syntax errors.",
+          "implementation": "Verilator --lint-only; iverilog -t null"
         },
         {
           "name": "Functional Correctness",
           "symbol": "FC",
-          "definition": "Percentage of designs that produce expected simulation outputs under reference testbench."
-        },
-        {
-          "name": "Synthesis Quality",
-          "symbol": "SQ",
-          "definition": "Average cell count and logic depth of synthesized design (lower is better)."
-        },
-        {
-          "name": "Testbench Detection Rate",
-          "symbol": "TDR",
-          "definition": "Fraction of injected faults detected by generated testbench."
+          "definition": "Percentage of designs that pass all test cases in the reference testbench simulation.",
+          "implementation": "iverilog + vvp, parsing PASS/FAIL output"
         },
         {
           "name": "Generation Time",
           "symbol": "GT",
-          "definition": "Average time taken (in seconds) for model inference."
+          "definition": "Time (seconds) for model inference per task.",
+          "implementation": "Python time.time() around model.generate_hdl() call"
+        },
+        {
+          "name": "Compile Time",
+          "definition": "Time (seconds) for Verilator/iverilog compilation.",
+          "implementation": "Python time.time() around compiler.compile() call"
+        },
+        {
+          "name": "Simulation Time",
+          "definition": "Time (seconds) for iverilog/vvp simulation run.",
+          "implementation": "Python time.time() around simulator.simulate() call"
+        },
+        {
+          "name": "Iteration Count",
+          "definition": "Number of generation-evaluation cycles before the best result was accepted. Phase 4+ only.",
+          "implementation": "Tracked in EvaluationMetrics.iteration_count by IterativeEvaluator"
+        },
+        {
+          "name": "Confidence Entropy",
+          "definition": "Entropy over token log-probabilities from the model; lower entropy = higher confidence. Phase 4+ only.",
+          "implementation": "ConfidenceTracker.calculate_entropy(), stored in EvaluationMetrics.confidence_entropy"
+        },
+        {
+          "name": "Waveform Diff Summary",
+          "definition": "Summary of signal mismatches between generated and reference waveform. Phase 4+ when enabled.",
+          "implementation": "WaveformAnalyzer, stored in EvaluationMetrics.waveform_diff_summary"
+        },
+        {
+          "name": "Formal Equivalence Status",
+          "definition": "Result of formal equivalence check between generated DUT and reference. Phase 4+ when enabled.",
+          "implementation": "FormalVerifier, stored in EvaluationMetrics.formal_equiv_status"
+        },
+        {
+          "name": "Semantic Repair Applied",
+          "definition": "List of semantic repair operations applied during iterative refinement. Phase 4+ only.",
+          "implementation": "SemanticRepair, stored in EvaluationMetrics.semantic_repair_applied"
         }
       ],
-      "secondary": [
-        {
-          "name": "Prompt Sensitivity",
+      "not_implemented": {
+        "note": "The following metrics were originally specified as goals but have NOT been computed in any benchmark run.",
+        "synthesis_quality": {
+          "symbol": "SQ",
+          "definition": "Average cell count and logic depth of synthesized design.",
+          "reason": "Requires Yosys synthesis; SynthesisTool class exists in code but is never invoked by any phase runner. gate_count, cell_count, and estimated_area are always None in all results."
+        },
+        "testbench_detection_rate": {
+          "symbol": "TDR",
+          "definition": "Fraction of injected faults detected by generated testbench.",
+          "reason": "Fault injection pipeline was never built. fault_detection_ratio is always None."
+        },
+        "prompt_sensitivity": {
           "symbol": "PS",
-          "definition": "Variance in FC across different prompt templates for the same model."
+          "definition": "Variance in FC across different prompt templates (A/B/C) for the same model.",
+          "reason": "Each phase runner uses a single fixed prompt style. Cross-template comparison has not been run."
         },
-        {
-          "name": "Hallucination Index",
+        "hallucination_index": {
           "symbol": "HI",
-          "definition": "Average count of undeclared signals or impossible constructs per 100 lines of HDL."
+          "definition": "Average count of undeclared signals or impossible constructs per 100 lines of HDL.",
+          "reason": "No code exists to count undeclared signals. This metric has never been computed."
         },
-        {
-          "name": "Usability Score",
+        "usability_score": {
           "symbol": "US",
-          "definition": "Composite score = 0.4*FC + 0.3*SV + 0.2*(1 - normalized area) + 0.1*TDR"
+          "definition": "Composite score = 0.4*FC + 0.3*SV + 0.2*(1 - normalized area) + 0.1*TDR",
+          "reason": "Requires SQ and TDR which are not implemented. This formula has never been evaluated."
         }
-      ]
+      }
     },
     "evaluation": {
       "quantitative_analysis": [
-        "Aggregate per-model averages and standard deviations for all metrics.",
+        "Aggregate per-model averages and standard deviations for SV and FC.",
         "Run paired statistical tests (Wilcoxon/t-test) for FC and SV between models.",
         "Compute confidence intervals (95%) for functional correctness."
       ],
       "qualitative_analysis": [
         "Inspect representative failed outputs for syntax, interface, or logic errors.",
-        "Classify failures: syntax, interface mismatch, behavioral bug, non-synthesizable construct, ineffective testbench.",
+        "Classify failures: syntax, interface mismatch, behavioral bug, non-synthesizable construct.",
         "Present examples and categorize root causes."
       ],
       "visualizations": [
         "Bar chart: Functional pass rate per model per task category.",
-        "Box plot: Cell count (area proxy) distribution per model.",
-        "Heatmap: Prompt sensitivity variance.",
-        "Failure distribution pie chart."
+        "Heatmap: Category-level performance matrix.",
+        "Failure distribution pie chart.",
+        "Iteration/entropy analysis charts (Phase 4+)."
       ]
     },
     "tools_and_environment": {
       "languages": ["Python 3.10+", "Verilog"],
-      "frameworks": ["Transformers", "Ollama", "Yosys", "Icarus Verilog", "Verilator"],
-      "automation": "Python orchestration script to automate model querying, compilation, simulation, and metric logging.",
+      "frameworks": ["Transformers", "Ollama", "Icarus Verilog", "Verilator"],
+      "tools_available_but_not_invoked": ["Yosys"],
+      "automation": "Python orchestration scripts (run_phase1.py through run_phase5.py) automate model querying, compilation, simulation, and metric logging.",
       "environment": {
         "containerization": "Docker image with EDA + Python dependencies",
         "hardware": {
@@ -221,12 +265,11 @@
     },
     "expected_outcomes": {
       "deliverables": [
-        "A reproducible open-source benchmark suite for HDL/testbench generation.",
-        "Quantitative comparison across small, medium, and large open models.",
+        "A reproducible open-source benchmark suite for HDL generation.",
+        "Quantitative comparison of syntax validity and functional correctness across small, medium, and large open models.",
         "Error taxonomy highlighting failure types and their frequencies.",
-        "Insights into model scaling, prompt robustness, and verification coverage."
+        "Insights into model scaling, post-processing strategies, and iterative refinement."
       ],
-      "contribution": "Establishes the first structured, reproducible benchmark for generative HDL and testbench generation, providing measurable baselines for future EDA-AI research."
+      "contribution": "Establishes a structured, reproducible benchmark for generative HDL generation, providing measurable baselines for future EDA-AI research."
     }
   }
-  
