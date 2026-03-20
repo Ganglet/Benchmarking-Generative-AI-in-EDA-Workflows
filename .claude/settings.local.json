@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python figures/generate_pipeline_diagram.py)"
+    ]
+  }
+}
