@@ -20,6 +20,8 @@ This project establishes the first structured, reproducible benchmark for AI-ass
 | Medium | StarCoder2 | 7B | Code-specialized mid-tier model |
 | Small | TinyLlama | 1.1B | Lightweight resource-constrained baseline |
 
+<img width="2830" height="1272" alt="pipeline_flow_diagram" src="https://github.com/user-attachments/assets/d0444274-b7cb-4b16-99aa-cfa5f6e74109" />
+
 ## 📊 Evaluation Metrics
 
 ### Metrics Computed in Every Benchmark Run
@@ -117,6 +119,8 @@ python visualizations.py ../results/mini_benchmark/benchmark_results.json ../fig
 
 > **Note on reproducibility**: All 12 benchmarks (1,610 runs) were conducted locally on macOS (Apple Silicon) using Icarus Verilog 12.0, Verilator 5.038, and Yosys 0.58 installed via Homebrew. The Docker setup is provided to allow others to run the pipeline on any platform without manual tool installation. It has been validated by successfully running the mini benchmark (5 tasks × 3 models × 3 repetitions) end-to-end inside the container.
 >
+> <img width="1728" height="1117" alt="Screenshot 2026-03-31 at 11 52 06 AM" src="https://github.com/user-attachments/assets/707d7cbc-2e82-450f-92d1-be0bc2528e9c" />
+
 > Tool versions inside the container (Debian Trixie apt): Icarus Verilog 12.0, Verilator 5.032, Yosys 0.52.
 
 ### Prerequisites
@@ -461,6 +465,10 @@ This section documents all 12 benchmark tests, which files were used, and their 
 
 ---
 
+<img width="3496" height="4470" alt="task_performance_matrix" src="https://github.com/user-attachments/assets/93769eda-8356-4557-9e47-bd6e5820fbd2" />
+<img width="2956" height="2534" alt="model_comparison_radar" src="https://github.com/user-attachments/assets/e78f850f-7a1e-4b01-8c4d-0733676d0782" />
+
+
 ### File Usage Summary
 
 | File | Benchmarks Used | Purpose |
@@ -584,6 +592,8 @@ model = HuggingFaceInterface("org/model-name")
   - 8 FSM designs (sequence detectors, controllers, traffic light)
   - 5 mixed/complex designs (priority encoder, ALU)
 - 🛑 **Further dataset expansion intentionally paused at 50 tasks** to focus on semantic-aware refinement, evaluation quality, and documentation.
+
+<img width="4124" height="2715" alt="dataset_statistics_dashboard" src="https://github.com/user-attachments/assets/bfa912e3-6530-4e38-a0ad-4542766d3b55" />
 
 ## 🛠️ Development Roadmap
 
