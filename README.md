@@ -63,7 +63,7 @@ pip install -r requirements.txt
 ```
 
 **Optional Dependencies (for Phase 4 features):**
-- `pyvcd>=1.2.0` - For waveform analysis (installed by default in requirements.txt)
+- `pyvcd>=0.4.0` - For waveform analysis (installed by default in requirements.txt)
 - `pyverilog>=1.3.0` - For AST-based code repair (installed by default in requirements.txt)
 
 Note: These are optional. If not installed, Phase 4 will gracefully disable the corresponding features (waveform analysis, AST repair).
@@ -115,10 +115,14 @@ python visualizations.py ../results/mini_benchmark/benchmark_results.json ../fig
 
 ## 🐳 Docker Setup
 
+> **Note on reproducibility**: All 12 benchmarks (1,610 runs) were conducted locally on macOS (Apple Silicon) using Icarus Verilog 12.0, Verilator 5.038, and Yosys 0.58 installed via Homebrew. The Docker setup is provided to allow others to run the pipeline on any platform without manual tool installation. It has been validated by successfully running the mini benchmark (5 tasks × 3 models × 3 repetitions) end-to-end inside the container.
+>
+> Tool versions inside the container (Debian Trixie apt): Icarus Verilog 12.0, Verilator 5.032, Yosys 0.52.
+
 ### Prerequisites
 
 **On the Host Machine:**
-1. Install Ollama (if not already installed):
+1. Install Ollama:
    ```bash
    curl -fsSL https://ollama.com/install.sh | sh
    ollama serve  # Start Ollama service
@@ -142,24 +146,23 @@ docker-compose up -d
 # Access shell
 docker exec -it eda_benchmark bash
 
-# Inside container:
+# Inside container — run mini benchmark (5 tasks, validated):
 cd /workspace/Quantitative
 python run_mini_benchmark.py
+
+# Or run the full 50-task benchmark:
+python run_phase5.py
 ```
 
 ### Docker-Ollama Connection
 
-The Docker setup is configured to automatically connect to Ollama on the host machine:
-- **Windows/Mac Docker Desktop**: Uses `host.docker.internal:11434` (configured automatically)
-- **Linux**: May need to set `OLLAMA_BASE_URL` environment variable with your host IP
-
-**Manual Configuration:**
-If Ollama is running on a different host or port, set the environment variable:
-```bash
-# Set in docker-compose.yml or as environment variable
-export OLLAMA_BASE_URL=http://your-host-ip:11434
-docker-compose up -d
-```
+Ollama runs on the host machine; the container connects to it via `OLLAMA_BASE_URL`:
+- **Windows/Mac Docker Desktop**: Uses `http://host.docker.internal:11434` (configured automatically)
+- **Linux**: Set `OLLAMA_BASE_URL` to your host IP:
+  ```bash
+  export OLLAMA_BASE_URL=http://your-host-ip:11434
+  docker-compose up -d
+  ```
 
 **Verify Connection:**
 ```bash
@@ -200,10 +203,10 @@ Paper/
 │   ├── run_phase3.py             # Phase 3: Iterative refinement (legacy)
 │   ├── run_phase4.py             # Phase 4: Semantic-aware refinement
 │   ├── run_phase5.py             # Phase 5: Extended repair experiments
-│   ├── Research_Data/            # Benchmark analysis reports (1st–10th)
+│   ├── Research_Data/            # Benchmark analysis reports (1st–12th)
 │   │   ├── 1st_Benchmark_Results.md
 │   │   ├── ...
-│   │   └── 10th_Benchmark_Results.md
+│   │   └── 12th_Benchmark_Results.md
 │   └── dataset/
 │       ├── tasks.json            # Task metadata (50 tasks, final scope)
 │       ├── combinational/        # Combinational circuits (23 tasks)
@@ -222,11 +225,13 @@ Paper/
 │   ├── Benchmark_8_Results/
 │   ├── Benchmark_9_Results/
 │   ├── Benchmark_10_Results/
-│   └── Benchmark_11_Results/
+│   ├── Benchmark_11_Results/
+│   ├── Benchmark_12_Results/
+│   └── mini_benchmark/                               # Docker-validated mini benchmark results
 ├── figures/                                          # Visualization exports by benchmark
 │   ├── 1st_Benchmark_figures/
 │   ├── ...
-│   └── 10th_Benchmark_figures/
+│   └── 12th_Benchmark_figures/
 ├── docker-compose.yml                               # Containerized workflow entrypoint
 ├── Dockerfile                                        # Base container definition
 ├── LICENSE                                           # MIT license (code)
@@ -237,7 +242,7 @@ Paper/
 
 ## 📊 Benchmark Test History
 
-This section documents all 9 benchmark tests, which files were used, and their key features.
+This section documents all 12 benchmark tests, which files were used, and their key features.
 
 ### Core Files (Used in All Benchmarks)
 - **`Eval_Pipeline.py`** - Main evaluation pipeline (compilation, simulation, metrics)
@@ -424,6 +429,22 @@ This section documents all 9 benchmark tests, which files were used, and their k
 
 ---
 
+### Benchmark 11: Single-Model Reproducibility & Generation Time Optimization
+**Runner**: `run_phase4.py`
+**Methodology**: Phase 4 - Single-model validation run (Llama-3-8B only)
+**Tasks**: 50 tasks (full dataset)
+**Models**: Llama-3-8B only
+**Repetitions**: 3 per task (150 total generations)
+**Key Features**:
+- Validates reproducibility of Benchmark 10 results with a single model
+- Measures generation time optimization (8.84s → 4.77s, −46%)
+- Confirms syntax validity (71.3%) and simulation pass rate (61.3%) are stable
+
+**Results**: `results/Benchmark_11_Results/`
+**Analysis**: `Quantitative/Research_Data/11th_Benchmark_Results.md`
+
+---
+
 ### Benchmark 12: Phase 5 Quality-Focused Multi-Model Run
 **Runner**: `run_phase5.py`  
 **Methodology**: Phase 5 strict mode (waveform + formal enabled, semantic/AST repair)  
@@ -593,10 +614,10 @@ model = HuggingFaceInterface("org/model-name")
 
 *Decision*: Scope is intentionally capped at 50 curated tasks to prioritize deeper analysis, semantic-aware refinement, and documentation polish over further breadth.
 
-### Phase 4: Full Benchmark & Publication 📋
-- [ ] Run complete experiments on final 50-task dataset
-- [ ] Generate publication-ready results
-- [ ] Write research paper
+### Phase 4: Full Benchmark & Publication ✅
+- [x] Run complete experiments on final 50-task dataset (Benchmarks 10, 11, 12 — 1,610 total runs)
+- [x] Generate publication-ready results
+- [x] Write research paper (submitted for journal publication)
 
 
 ## 🤝 Contributing
@@ -625,4 +646,4 @@ See: [DATASET_LICENSE](DATASET_LICENSE)
 
 ---
 
-**Status**: Active Development | **Last Updated**: November 2025
+**Status**: Research complete, paper under journal review | **Last Updated**: March 2026
